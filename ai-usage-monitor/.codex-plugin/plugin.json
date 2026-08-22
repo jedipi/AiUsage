@@ -1,0 +1,18 @@
+{
+  "name": "ai-usage-monitor",
+  "version": "0.1.5",
+  "description": "Publishes Codex usage limits to a local cache for the AI Usage Rainmeter skin.",
+  "author": {
+    "name": "Local developer"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Ai Usage Monitor",
+    "shortDescription": "Show Codex usage in Rainmeter.",
+    "longDescription": "Captures Codex rate-limit snapshots locally and provides setup and refresh commands for the companion Rainmeter skin.",
+    "developerName": "Local developer",
+    "category": "Productivity",
+    "capabilities": ["Local usage monitoring"],
+    "defaultPrompt": ["Set up the AI Usage Rainmeter monitor."]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "description": "Refresh the local AI usage cache after an agent response.",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "powershell",
+            "command": "& \"${CLAUDE_PLUGIN_ROOT}/scripts/Update-AiUsage.ps1\" -Source Auto",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
