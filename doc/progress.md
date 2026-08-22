@@ -1,6 +1,6 @@
 # TokenMeter Progress
 
-Last updated: 2026-08-22
+Last updated: 2026-08-23
 
 ## Current status
 
@@ -23,7 +23,7 @@ The old combined skin was preserved as `AIUsage\AIUsage.combined.ini.bak`.
 - `rainmeter\RMSKIN.ini` — Rainmeter package metadata.
 - `scripts\` — collector, installers, and package builder.
 - `tests\` — PowerShell regression and package tests.
-- `skills\usage-monitor\SKILL.md` — usage-monitor skill instructions.
+- `skills\refresh-usage-limit\SKILL.md` — refresh-usage-limit skill instructions.
 - `dist\` — generated `.rmskin` packages.
 - `README.md` and `LICENSE` — repository-level documentation and license.
 
@@ -100,12 +100,12 @@ Rainmeter reads `usage.cache`. The JSON file remains the canonical structured ca
 
 The latest package is:
 
-[AIUsage_0.2.9.rmskin](../dist/AIUsage_0.2.9.rmskin)
+[AIUsage_0.2.10.rmskin](../dist/AIUsage_0.2.10.rmskin)
 
 SHA-256:
 
 ```text
-ED1612AA870BF59B0FDC95B41E80E2E3026E741575D8CF8FBB947BB54368D64A
+FC2A5AA5667B19FFD893EF4387CC743FE23287E23E2AEF5F497A79F4430F12F8
 ```
 
 The package contains the required Rainmeter footer and is validated by `Test-RainmeterPackage.ps1`.

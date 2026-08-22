@@ -9,7 +9,7 @@
       "name": "tokenmeter",
       "source": "./",
       "description": "Publishes Codex and Claude Code usage limits to the TokenMeter Rainmeter cache.",
-      "version": "0.2.9",
+      "version": "0.2.10",
       "author": {
         "name": "jedipi"
       }
