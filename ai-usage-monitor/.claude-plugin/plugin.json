@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "ai-usage-monitor",
-  "version": "0.1.5",
+  "version": "0.2.4",
   "description": "Publishes Claude Code usage limits to a local cache for Rainmeter.",
   "author": { "name": "Local developer" },
   "license": "MIT"
