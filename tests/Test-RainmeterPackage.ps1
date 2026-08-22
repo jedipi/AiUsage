@@ -1,7 +1,7 @@
 param([string]$PackagePath)
 
 $ErrorActionPreference = 'Stop'
-if ([string]::IsNullOrWhiteSpace($PackagePath)) { $PackagePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'dist\AIUsage_0.2.8.rmskin' }
+if ([string]::IsNullOrWhiteSpace($PackagePath)) { $PackagePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'dist\AIUsage_0.2.9.rmskin' }
 $bytes = [System.IO.File]::ReadAllBytes($PackagePath)
 if ($bytes.Length -lt 16) { throw 'Package is too short to contain a Rainmeter 4.5 footer.' }
 

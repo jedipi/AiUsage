@@ -1,15 +1,31 @@
-# AI Usage Monitor Progress
+# TokenMeter Progress
 
 Last updated: 2026-08-22
 
 ## Current status
 
-The project is implemented as a Windows PowerShell + Rainmeter usage monitor for Codex and Claude Code. The active Rainmeter installation has been updated directly and currently uses two independent skins:
+The project is implemented as a Windows PowerShell + Rainmeter usage monitor for Codex and Claude Code. The repository now uses a root-level layout; `ai-usage-monitor\` is no longer the source root. The active Rainmeter installation has been updated directly and currently uses two independent provider skins:
 
-- `AIUsage\Codex\Codex.ini`
-- `AIUsage\Claude\Claude.ini`
+- `AIUsage\Codex\Codex.ini` and `AIUsage\Codex\Gauge.ini`
+- `AIUsage\Claude\Claude.ini` and `AIUsage\Claude\Gauge.ini`
 
 The old combined skin was preserved as `AIUsage\AIUsage.combined.ini.bak`.
+
+## Repository layout
+
+- `.codex-plugin\plugin.json` — Codex plugin manifest.
+- `.agents\plugins\marketplace.json` — Codex GitHub marketplace catalog.
+- `.claude-plugin\plugin.json` — Claude Code plugin manifest.
+- `.claude-plugin\marketplace.json` — Claude Code GitHub marketplace catalog.
+- `hooks.json` — root-level Codex lifecycle hooks.
+- `hooks\hooks.json` — Claude Code lifecycle hooks.
+- `rainmeter\AIUsage\` — shared resources, split provider skins, gauge variants, and launcher.
+- `rainmeter\RMSKIN.ini` — Rainmeter package metadata.
+- `scripts\` — collector, installers, and package builder.
+- `tests\` — PowerShell regression and package tests.
+- `skills\usage-monitor\SKILL.md` — usage-monitor skill instructions.
+- `dist\` — generated `.rmskin` packages.
+- `README.md` and `LICENSE` — repository-level documentation and license.
 
 ## Completed functionality
 
@@ -69,34 +85,34 @@ Rainmeter reads `usage.cache`. The JSON file remains the canonical structured ca
 
 ## Important source files
 
-- `ai-usage-monitor\scripts\Update-AiUsage.ps1` — shared collector.
-- `ai-usage-monitor\scripts\Install-ClaudeStatusLine.ps1` — Claude status-line bootstrap.
-- `ai-usage-monitor\scripts\Install-Rainmeter.ps1` — manual skin installation.
-- `ai-usage-monitor\scripts\Build-RainmeterPackage.ps1` — valid `.rmskin` builder with Rainmeter 4.5 footer.
-- `ai-usage-monitor\rainmeter\AIUsage\@Resources\Provider.inc` — shared compact UI.
-- `ai-usage-monitor\rainmeter\AIUsage\@Resources\Gauge.inc` — shared gauge variant UI.
-- `ai-usage-monitor\rainmeter\AIUsage\@Resources\Usage.lua` — cache reader and dynamic colors.
-- `ai-usage-monitor\rainmeter\AIUsage\@Resources\RefreshCodex.vbs` — hidden Codex refresh launcher.
-- `ai-usage-monitor\hooks.json` — Codex lifecycle hooks.
-- `ai-usage-monitor\hooks\hooks.json` — Claude lifecycle hook.
+- `scripts\Update-AiUsage.ps1` — shared collector.
+- `scripts\Install-ClaudeStatusLine.ps1` — Claude status-line bootstrap.
+- `scripts\Install-Rainmeter.ps1` — manual skin installation.
+- `scripts\Build-RainmeterPackage.ps1` — valid `.rmskin` builder with Rainmeter 4.5 footer.
+- `rainmeter\AIUsage\@Resources\Provider.inc` — shared compact UI.
+- `rainmeter\AIUsage\@Resources\Gauge.inc` — shared gauge variant UI.
+- `rainmeter\AIUsage\@Resources\Usage.lua` — cache reader and dynamic colors.
+- `rainmeter\AIUsage\@Resources\RefreshCodex.vbs` — hidden Codex refresh launcher.
+- `hooks.json` — Codex lifecycle hooks.
+- `hooks\hooks.json` — Claude lifecycle hook.
 
 ## Current package
 
 The latest package is:
 
-[AIUsage_0.2.8.rmskin](../ai-usage-monitor/dist/AIUsage_0.2.8.rmskin)
+[AIUsage_0.2.9.rmskin](../dist/AIUsage_0.2.9.rmskin)
 
 SHA-256:
 
 ```text
-6CB03DD7AA5C4B29742F688B675DF342B6F6134543CC8A5BA1F192F3686D6FDF
+ED1612AA870BF59B0FDC95B41E80E2E3026E741575D8CF8FBB947BB54368D64A
 ```
 
 The package contains the required Rainmeter footer and is validated by `Test-RainmeterPackage.ps1`.
 
 ## Validation completed
 
-The following checks pass:
+The following checks pass when run from the repository root:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\Test-RainmeterBindings.ps1

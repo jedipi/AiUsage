@@ -1,9 +1,9 @@
 ---
 name: usage-monitor
-description: Set up or troubleshoot the AI Usage Monitor cache and companion Rainmeter skin.
+description: Set up or troubleshoot the TokenMeter cache and companion Rainmeter skin.
 ---
 
-# AI Usage Monitor
+# TokenMeter
 
 Run `scripts/Update-AiUsage.ps1 -Source Codex` to refresh Codex quota data. Claude quota data is supplied by Claude Code's status-line JSON and requires running `scripts/Install-ClaudeStatusLine.ps1` once.
 

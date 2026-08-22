@@ -1,4 +1,4 @@
-# AI Usage Monitor
+# TokenMeter
 
 A dependency-free Windows usage dashboard for Codex, Claude Code, and Rainmeter. PowerShell collects quota metadata, both coding-agent plugins keep it fresh, and a native Rainmeter skin renders five-hour and weekly usage.
 
@@ -6,6 +6,7 @@ A dependency-free Windows usage dashboard for Codex, Claude Code, and Rainmeter.
 
 - `.codex-plugin/` and root `hooks.json`: Codex plugin and lifecycle hooks.
 - `.claude-plugin/` and `hooks/hooks.json`: Claude Code plugin and lifecycle hook.
+- `.agents/plugins/marketplace.json` and `.claude-plugin/marketplace.json`: GitHub marketplace catalogs for Codex and Claude Code.
 - `scripts/Update-AiUsage.ps1`: shared, read-only collector.
 - `rainmeter/AIUsage/`: separate 270 × 180 horizontal-bar and gauge skins.
 
@@ -15,24 +16,52 @@ The collector writes `%LOCALAPPDATA%\AiUsage\usage.json` plus a simple `usage.ca
 
 ### Codex
 
-Install this folder as a local Codex plugin using your normal marketplace/plugin workflow. Codex discovers `hooks.json` at the plugin root. The first use may ask you to trust the hook.
+Install the plugin and its GitHub marketplace catalog:
 
-For development, keep this repository path as the plugin source and validate it with the bundled plugin validator.
+```powershell
+codex plugin marketplace add jedipi/AiUsage --ref main
+codex plugin add tokenmeter@tokenmeter
+```
+
+Alternatively, start `codex` and run `/plugins` to find and install `tokenmeter` from the configured marketplace. Start a new Codex session after installation so the plugin hooks and skills are loaded. Codex discovers `hooks.json` at the plugin root; the first use may ask you to trust the hook.
+
+See the [official Codex plugin packaging and marketplace documentation](https://developers.openai.com/plugins/build/plugins) for marketplace sources and plugin behavior.
+
+For development, run Codex from the cloned repository; the root contains the `.codex-plugin/plugin.json` manifest and root `hooks.json`.
 
 ### Claude Code
 
-Load or install this folder as a Claude Code plugin, then run the status-line bootstrap once:
+Install the plugin and its GitHub marketplace catalog:
 
 ```powershell
+claude plugin marketplace add jedipi/AiUsage@main
+claude plugin install tokenmeter@tokenmeter --scope user
+```
+
+If Claude reports `Marketplace file not found`, the marketplace catalog has not reached the GitHub `main` branch yet. Before publishing the catalog, test the local checkout directly:
+
+```powershell
+claude plugin marketplace add .\.claude-plugin\marketplace.json
+```
+
+After `.claude-plugin/marketplace.json` is committed and pushed to GitHub, rerun the GitHub command above.
+
+Then clone the repository and run the status-line bootstrap once:
+
+```powershell
+git clone https://github.com/jedipi/AiUsage.git
+Set-Location .\AiUsage
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\Install-ClaudeStatusLine.ps1
 ```
 
 Claude quota values appear after Claude Code receives its first API response. If another status line is already configured, the installer stops without changing it; merge the generated command into your existing status-line script.
 
-For development:
+See the [Claude Code marketplace documentation](https://code.claude.com/docs/en/discover-plugins) for marketplace sources, scopes, and plugin updates.
+
+For development, load the cloned repository for the current session:
 
 ```powershell
-claude --plugin-dir .\ai-usage-monitor
+claude --plugin-dir .
 ```
 
 ### Rainmeter
