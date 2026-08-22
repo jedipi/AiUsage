@@ -1,6 +1,6 @@
 {
   "name": "ai-usage-monitor",
-  "version": "0.2.4",
+  "version": "0.2.8",
   "description": "Publishes Codex usage limits to a local cache for the AI Usage Rainmeter skin.",
   "author": {
     "name": "Local developer"

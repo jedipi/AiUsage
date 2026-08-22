@@ -7,7 +7,7 @@ A dependency-free Windows usage dashboard for Codex, Claude Code, and Rainmeter.
 - `.codex-plugin/` and root `hooks.json`: Codex plugin and lifecycle hooks.
 - `.claude-plugin/` and `hooks/hooks.json`: Claude Code plugin and lifecycle hook.
 - `scripts/Update-AiUsage.ps1`: shared, read-only collector.
-- `rainmeter/AIUsage/`: 680 × 390 dark dashboard skin.
+- `rainmeter/AIUsage/`: separate 270 × 180 horizontal-bar and gauge skins.
 
 The collector writes `%LOCALAPPDATA%\AiUsage\usage.json` plus a simple `usage.cache` bridge for Rainmeter. Writes are atomic. Codex collection reads only `token_count` records containing `rate_limits`; it does not inspect prompts or responses. Claude collection uses the documented status-line JSON supplied by Claude Code and does not read OAuth credentials.
 
@@ -43,7 +43,7 @@ Run:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\Install-Rainmeter.ps1
 ```
 
-Refresh Rainmeter and load `AIUsage\Codex\Codex.ini` and `AIUsage\Claude\Claude.ini`. They are independent skins and can be positioned or unloaded separately. The package launcher loads both once after installation. Click **REFRESH** on Codex to rescan immediately; Claude updates automatically while Claude Code is active.
+Refresh Rainmeter and load `AIUsage\Codex\Codex.ini` and `AIUsage\Claude\Claude.ini`. They are independent skins and can be positioned or unloaded separately. The package launcher loads both once after installation. To use the gauge variant from the reference design, load `AIUsage\Codex\Gauge.ini` and/or `AIUsage\Claude\Gauge.ini` instead. Click **REFRESH** on Codex to rescan immediately; Claude updates automatically while Claude Code is active.
 
 To rebuild the installer, run `scripts\Build-RainmeterPackage.ps1`. The builder adds Rainmeter 4.5's required 16-byte package footer; renaming a normal ZIP file to `.rmskin` is not sufficient.
 

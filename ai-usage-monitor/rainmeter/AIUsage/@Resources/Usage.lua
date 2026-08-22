@@ -14,6 +14,25 @@ local function barMeterName(providerName, windowName)
     return nil
 end
 
+local function gaugeMeterName(windowName)
+    if windowName == 'fiveHour' then return 'MeterFiveHourGauge' end
+    if windowName == 'weekly' then return 'MeterWeeklyGauge' end
+    return nil
+end
+
+local function gaugeValueMeterName(windowName)
+    if windowName == 'fiveHour' then return 'MeterFiveHourValue' end
+    if windowName == 'weekly' then return 'MeterWeeklyValue' end
+    return nil
+end
+
+local function setMeterOption(meterName, option, value)
+    if meterName and SKIN:GetMeter(meterName) then
+        SKIN:Bang('!SetOption', meterName, option, value)
+        SKIN:Bang('!UpdateMeter', meterName)
+    end
+end
+
 local function readCache()
     values = {}
     local base = os.getenv('LOCALAPPDATA')
@@ -40,9 +59,11 @@ function Update()
         local number = tonumber(value) or 0
         local meter = barMeterName(provider, window)
         if meter then
-            SKIN:Bang('!SetOption', meter, 'BarColor', quotaColor(number))
-            SKIN:Bang('!UpdateMeter', meter)
+            setMeterOption(meter, 'BarColor', quotaColor(number))
         end
+        local gauge = gaugeMeterName(window)
+        setMeterOption(gauge, 'LineColor', quotaColor(number))
+        setMeterOption(gaugeValueMeterName(window), 'FontColor', quotaColor(number))
         return math.max(0, math.min(100, number))
     end
     if not value or value == '' then return 'NO DATA' end

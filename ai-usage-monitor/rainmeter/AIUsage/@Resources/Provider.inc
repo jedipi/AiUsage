@@ -38,7 +38,7 @@ UpdateDivider=15
 Meter=Shape
 X=0
 Y=0
-Shape=Rectangle 0,0,270,220,16 | Fill Color #Card# | Stroke Color 53,65,79,180 | StrokeWidth 1
+Shape=Rectangle 0,0,270,180,16 | Fill Color #Card# | Stroke Color 53,65,79,180 | StrokeWidth 1
 
 [MeterProvider]
 Meter=String
@@ -163,16 +163,10 @@ H=7
 BarOrientation=Horizontal
 BarColor=#Accent#
 
-[MeterDivider]
-Meter=Shape
-X=18
-Y=180
-Shape=Line 0,0,234,0 | Stroke Color 53,65,79,160 | StrokeWidth 1
-
 [MeterRefresh]
 Meter=String
 X=252
-Y=198
+Y=17
 StringAlign=Right
 FontFace=#FontFace#
 FontSize=9
