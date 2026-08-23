@@ -22,7 +22,7 @@ codex plugin marketplace add jedipi/AiUsage --ref main
 codex plugin add tokenmeter@tokenmeter
 ```
 
-Start a new Codex session after installation so the plugin hooks and skills are loaded. Codex discovers `hooks.json` at the plugin root; the first use may ask you to trust the hook.
+Start a new Codex session after installation so the plugin hooks and skills are loaded. The session-start hook refreshes quota data only. Codex discovers `hooks.json` at the plugin root; the first use may ask you to trust the hook.
 
 ### Claude Code
 
@@ -54,13 +54,17 @@ claude --plugin-dir .
 
 ### Rainmeter
 
-Run:
+Marketplace installation does not run arbitrary local PowerShell post-install commands. After installing either plugin, install Rainmeter 4.5+ and run this one-time setup command from a clone of the repository:
+
+Run this once:
 
 ```powershell
+git clone https://github.com/jedipi/AiUsage.git
+Set-Location .\AiUsage
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\Install-Rainmeter.ps1
 ```
 
-Refresh Rainmeter and load `AIUsage\Codex\Codex.ini` and `AIUsage\Claude\Claude.ini`. They are independent skins and can be positioned or unloaded separately. The package launcher loads both once after installation. To use the gauge variant from the reference design, load `AIUsage\Codex\Gauge.ini` and/or `AIUsage\Claude\Gauge.ini` instead. Click **REFRESH** on Codex to rescan immediately; Claude updates automatically while Claude Code is active.
+The skins remain independent and can be positioned or unloaded separately. The package launcher loads both once after installation. To use the gauge variant from the reference design, load `AIUsage\Codex\Gauge.ini` and/or `AIUsage\Claude\Gauge.ini` instead. Click **REFRESH** on Codex to rescan immediately; Claude updates automatically while Claude Code is active.
 
 To rebuild the installer, run `scripts\Build-RainmeterPackage.ps1`. The builder adds Rainmeter 4.5's required 16-byte package footer; renaming a normal ZIP file to `.rmskin` is not sufficient.
 

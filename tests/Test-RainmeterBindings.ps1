@@ -7,6 +7,9 @@ $claudeGauge = Get-Content -Raw -LiteralPath (Join-Path $root 'rainmeter\AIUsage
 $provider = Get-Content -Raw -LiteralPath (Join-Path $root 'rainmeter\AIUsage\@Resources\Provider.inc')
 $gauge = Get-Content -Raw -LiteralPath (Join-Path $root 'rainmeter\AIUsage\@Resources\Gauge.inc')
 $lua = Get-Content -Raw -LiteralPath (Join-Path $root 'rainmeter\AIUsage\@Resources\Usage.lua')
+$codexHooks = Get-Content -Raw -LiteralPath (Join-Path $root 'hooks.json')
+$claudeHooks = Get-Content -Raw -LiteralPath (Join-Path $root 'hooks\hooks.json')
+$rainmeterInstaller = Get-Content -Raw -LiteralPath (Join-Path $root 'scripts\Install-Rainmeter.ps1')
 
 if ($codexSkin -notmatch '(?m)^Provider=codex$') { throw 'Codex skin must use the codex provider.' }
 if ($claudeSkin -notmatch '(?m)^Provider=claude$') { throw 'Claude skin must use the claude provider.' }
@@ -16,6 +19,8 @@ if ($codexGauge -notmatch '(?m)^Provider=codex$') { throw 'Codex gauge skin must
 if ($claudeGauge -notmatch '(?m)^Provider=claude$') { throw 'Claude gauge skin must use the claude provider.' }
 if ($codexGauge -notmatch 'wscript\.exe.*RefreshCodex\.vbs') { throw 'Codex gauge refresh must use the hidden WScript launcher.' }
 if ($codexGauge -notmatch '(?m)^@Include=#@#Gauge\.inc$' -or $claudeGauge -notmatch '(?m)^@Include=#@#Gauge\.inc$') { throw 'Both gauge skins must use the shared gauge include.' }
+if ($codexHooks -match 'InstallRainmeter|Install-Rainmeter' -or $claudeHooks -match 'InstallRainmeter|Install-Rainmeter') { throw 'Plugin session hooks must not install Rainmeter on every session.' }
+if ($rainmeterInstaller -notmatch '!ActivateConfig' -or $rainmeterInstaller -notmatch 'Start-Process') { throw 'The one-time Rainmeter installer must load the launcher and start Rainmeter when needed.' }
 if ($provider -notmatch 'Shape=Rectangle 0,0,270,180,16') { throw 'Provider skins must use the compact 270x180 layout.' }
 if ($gauge -notmatch 'Shape=Rectangle 0,0,270,180,16') { throw 'Gauge skins must use the compact 270x180 layout.' }
 if ($provider -match '(?m)^\[MeterDivider\]') { throw 'The divider must be removed.' }

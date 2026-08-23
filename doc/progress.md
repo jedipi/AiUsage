@@ -55,6 +55,7 @@ The old combined skin was preserved as `AIUsage\AIUsage.combined.ini.bak`.
   - `W   In <weekly reset time>`
 
 - A launcher loads both skins and positions them at startup.
+- Rainmeter installation/loading is a one-time post-plugin setup command; Codex and Claude `SessionStart` hooks only refresh quota data.
 - Codex refresh uses `wscript.exe` + `RefreshCodex.vbs`, which starts PowerShell hidden so no console window appears.
 - Claude and Codex refresh actions remain independent.
 
@@ -100,12 +101,12 @@ Rainmeter reads `usage.cache`. The JSON file remains the canonical structured ca
 
 The latest package is:
 
-[AIUsage_0.2.10.rmskin](../dist/AIUsage_0.2.10.rmskin)
+[AIUsage_0.2.12.rmskin](../dist/AIUsage_0.2.12.rmskin)
 
 SHA-256:
 
 ```text
-FC2A5AA5667B19FFD893EF4387CC743FE23287E23E2AEF5F497A79F4430F12F8
+DA27FA3221D0D5D24663F982FD95AE6D970094BCA964064CB8B2F8C8306BAE5B
 ```
 
 The package contains the required Rainmeter footer and is validated by `Test-RainmeterPackage.ps1`.
