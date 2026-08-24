@@ -1,0 +1,24 @@
+# Credentials and local secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+credentials*.json
+secrets*.json
+
+# Local runtime data and diagnostics
+usage.json
+usage.cache
+*.log
+*.tmp
+*.user
+*.suo
+
+# OS and editor metadata
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

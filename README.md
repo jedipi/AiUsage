@@ -67,7 +67,7 @@ Then install the status-line adapter once from the repository clone:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\Install-AntigravityStatusLine.ps1
 ```
 
-The installer configures `~\.gemini\antigravity-cli\settings.json`, keeps Antigravity's built-in status line using `stack_with_default`, and stops if a different custom status line is already configured. The adapter reads only the documented `quota` object and writes the shared `%LOCALAPPDATA%\AiUsage` cache. The Antigravity skin displays two weekly model pools—`GEMINI` and `CLAUDE/GPT`—and ignores five-hour bucket IDs. See the [Antigravity plugin documentation](https://antigravity.google/docs/cli/plugins) and [status-line quota schema](https://antigravity.google/docs/cli/statusline) for the supported integration points.
+The installer configures `~\.gemini\antigravity-cli\settings.json`, keeps Antigravity's built-in status line using `stack_with_default`, and stops if a different custom status line is already configured. The adapter reads only the documented `quota` object and writes the shared `%LOCALAPPDATA%\AiUsage` cache. The Antigravity hook verifies the installed hook script's SHA-256 before executing it. The Antigravity skin displays two weekly model pools—`GEMINI` and `CLAUDE/GPT`—and ignores five-hour bucket IDs. See the [Antigravity plugin documentation](https://antigravity.google/docs/cli/plugins) and [status-line quota schema](https://antigravity.google/docs/cli/statusline) for the supported integration points.
 
 ### Rainmeter
 

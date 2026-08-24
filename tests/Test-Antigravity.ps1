@@ -48,7 +48,14 @@ try {
     if ($manifest.'$schema' -ne 'https://antigravity.google/schemas/v1/plugin.json') { throw 'Antigravity plugin schema is incorrect.' }
     $hooks = Get-Content -Raw -LiteralPath (Join-Path $root '.agents\plugins\tokenmeter\hooks.json') | ConvertFrom-Json
     if ($null -eq $hooks.'tokenmeter-refresh'.Stop) { throw 'Antigravity Stop hook is missing.' }
-    if ($hooks.'tokenmeter-refresh'.Stop[0].hooks[0].command -notmatch 'AntigravityHook\.ps1') { throw 'Antigravity hook command is incorrect.' }
+    $hookCommand = [string]$hooks.'tokenmeter-refresh'.Stop[0].hooks[0].command
+    $hookEncodedMatch = [regex]::Match($hookCommand, ' -EncodedCommand (?<payload>[A-Za-z0-9+/=]+)$')
+    if (-not $hookEncodedMatch.Success) { throw 'Antigravity hook command must use an integrity-checked encoded command.' }
+    $decodedHookCommand = [Text.Encoding]::Unicode.GetString([Convert]::FromBase64String($hookEncodedMatch.Groups['payload'].Value))
+    $expectedHookHash = (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $root 'scripts\AntigravityHook.ps1')).Hash
+    if ($decodedHookCommand -notlike '*AntigravityHook.ps1*' -or $decodedHookCommand -notlike '*Get-FileHash*' -or $decodedHookCommand -notlike "*$expectedHookHash*") {
+        throw 'Antigravity hook command must verify the installed script hash before execution.'
+    }
 
     $env:LOCALAPPDATA = $testInstall
     & (Join-Path $root 'scripts\Install-AntigravityStatusLine.ps1') -PluginRoot $root -SettingsPath $testSettings
@@ -66,6 +73,22 @@ try {
     foreach ($file in @('Update-AiUsage.ps1', 'AntigravityStatusLine.ps1', 'AntigravityHook.ps1')) {
         if (-not (Test-Path -LiteralPath (Join-Path $installedDirectory $file))) { throw "Antigravity installer did not copy $file." }
     }
+
+    $hookTokens = @($hookCommand -split ' ')
+    $hookExecutable = $hookTokens[0]
+    $hookArguments = @($hookTokens[1..($hookTokens.Count - 1)])
+    $hookOutput = $fixture | & $hookExecutable @hookArguments
+    if ($LASTEXITCODE -ne 0 -or $hookOutput -notmatch '^\{\}$') { throw 'Integrity-checked Antigravity hook command failed.' }
+
+    $installedHook = Join-Path $installedDirectory 'AntigravityHook.ps1'
+    $tamperMarker = Join-Path $installedDirectory 'tampered-hook-executed'
+    @(
+        "New-Item -ItemType File -Path (Join-Path `$PSScriptRoot 'tampered-hook-executed') -Force | Out-Null",
+        "Write-Output '{}'"
+    ) | Set-Content -LiteralPath $installedHook -Encoding utf8
+    $null = '{}' | & $hookExecutable @hookArguments
+    if (Test-Path -LiteralPath $tamperMarker) { throw 'Antigravity hook executed after its integrity check failed.' }
+    Copy-Item -LiteralPath (Join-Path $root 'scripts\AntigravityHook.ps1') -Destination $installedHook -Force
 
     # Antigravity tokenizes the configured command before launching it. Literal
     # quotes therefore reach powershell.exe as part of the -File path on Windows.

@@ -87,7 +87,7 @@ Implement color changes in `Usage.lua` through `!SetOption` / `!UpdateMeter`, no
 3. Add or update a focused regression test for every data or layout rule changed.
 4. Bump the package/plugin version when the distributable behavior changes.
 5. Build with `scripts\Build-RainmeterPackage.ps1`; do not rename a normal ZIP to `.rmskin`. The builder adds Rainmeter’s required footer.
-6. If the user asks to apply changes locally, update `C:\Users\jedi\Documents\Rainmeter\Skins\AIUsage` and refresh the affected configurations. Preserve recoverable backups for obsolete user-installed files.
+6. If the user asks to apply changes locally, update `%USERPROFILE%\Documents\Rainmeter\Skins\AIUsage` and refresh the affected configurations. Preserve recoverable backups for obsolete user-installed files.
 
 ### Valid Rainmeter package rule
 
@@ -102,6 +102,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\Test-RainmeterBi
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\Test-CodexRateLimits.ps1
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\Test-Antigravity.ps1
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\Test-Collector.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\Test-SecurityHygiene.ps1
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\Build-RainmeterPackage.ps1
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\Test-RainmeterPackage.ps1
 ```

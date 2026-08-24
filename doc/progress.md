@@ -46,6 +46,7 @@ The old combined skin was preserved as `AIUsage\AIUsage.combined.ini.bak`.
 - Google Antigravity quota data is read from its documented status-line `quota` object, grouped into weekly Gemini and Claude/GPT model pools, and does not read credentials, prompts, responses, or transcripts.
 - Antigravity's abbreviated `3p-weekly` bucket is mapped to the Claude/GPT pool alongside explicit Claude, GPT, and third-party bucket names.
 - The Antigravity status-line installer writes BOM-free UTF-8 settings and uses an encoded PowerShell command, avoiding both Antigravity's strict JSON parser and its Windows argument-tokenization issue with quoted `-File` paths.
+- The Antigravity lifecycle hook verifies the installed hook script's SHA-256 before executing it from `%LOCALAPPDATA%`.
 - Cache writes are atomic.
 
 ### Rainmeter UI
@@ -115,12 +116,12 @@ The cache includes an `antigravity` provider with `gemini` and `claudeGpt` weekl
 
 The latest package is:
 
-[AIUsage_0.2.17.rmskin](../dist/AIUsage_0.2.17.rmskin)
+[AIUsage_0.2.18.rmskin](../dist/AIUsage_0.2.18.rmskin)
 
 SHA-256:
 
 ```text
-A0C317795697A45C22C16A3B77B5520D78A326165046BF11E6A435358F19B5AE
+65E9C835FC6EFC037F578748BF8EEA95081D8A7A47D871B937084EA7CB399A08
 ```
 
 The package contains the required Rainmeter footer and is validated by `Test-RainmeterPackage.ps1`.
@@ -134,6 +135,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\Test-RainmeterBi
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\Test-CodexRateLimits.ps1
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\Test-Antigravity.ps1
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\Test-Collector.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\Test-SecurityHygiene.ps1
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\Build-RainmeterPackage.ps1
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\Test-RainmeterPackage.ps1
 ```
@@ -145,10 +147,10 @@ The tests cover split skins, gauge variants, reset-window mapping, Antigravity w
 The active Rainmeter skin path is:
 
 ```text
-C:\Users\jedi\Documents\Rainmeter\Skins\AIUsage
+%USERPROFILE%\Documents\Rainmeter\Skins\AIUsage
 ```
 
-The current installed files were backed up to `C:\Users\jedi\Documents\Rainmeter\Skins\AIUsage.backup-20260822-150547`, updated from the current source, and refreshed through Rainmeter. Reinstalling the latest `.rmskin` is still the portable way to reproduce the setup on another machine.
+The current installed files were backed up to `%USERPROFILE%\Documents\Rainmeter\Skins\AIUsage.backup-<timestamp>`, updated from the current source, and refreshed through Rainmeter. Reinstalling the latest `.rmskin` is still the portable way to reproduce the setup on another machine.
 
 ## Known follow-up items
 
