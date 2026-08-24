@@ -1,6 +1,6 @@
 {
   "name": "tokenmeter",
-  "version": "0.2.12",
+  "version": "0.2.13",
   "description": "Publishes Codex usage limits to a local cache for the TokenMeter Rainmeter skin.",
   "author": {
     "name": "jedipi"

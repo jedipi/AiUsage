@@ -54,7 +54,7 @@ claude --plugin-dir .
 
 ### Rainmeter
 
-Marketplace installation does not run arbitrary local PowerShell post-install commands. After installing either plugin, install Rainmeter 4.5+ and run this one-time setup command from a clone of the repository:
+Marketplace installation does not run arbitrary local PowerShell post-install commands. After installing either plugin, install Rainmeter 4.5+ and run this one-time setup command from a clone of the repository. In Codex, the `$install-rainmeter-skin` skill runs the same setup script.
 
 Run this once:
 

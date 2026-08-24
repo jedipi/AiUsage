@@ -24,6 +24,7 @@ The old combined skin was preserved as `AIUsage\AIUsage.combined.ini.bak`.
 - `scripts\` — collector, installers, and package builder.
 - `tests\` — PowerShell regression and package tests.
 - `skills\refresh-usage-limit\SKILL.md` — refresh-usage-limit skill instructions.
+- `skills\install-rainmeter-skin\SKILL.md` — one-time Rainmeter setup skill instructions.
 - `dist\` — generated `.rmskin` packages.
 - `README.md` and `LICENSE` — repository-level documentation and license.
 
@@ -88,7 +89,7 @@ Rainmeter reads `usage.cache`. The JSON file remains the canonical structured ca
 
 - `scripts\Update-AiUsage.ps1` — shared collector.
 - `scripts\Install-ClaudeStatusLine.ps1` — Claude status-line bootstrap.
-- `scripts\Install-Rainmeter.ps1` — manual skin installation.
+- `scripts\Install-Rainmeter.ps1` — one-time Rainmeter setup and manual reload.
 - `scripts\Build-RainmeterPackage.ps1` — valid `.rmskin` builder with Rainmeter 4.5 footer.
 - `rainmeter\AIUsage\@Resources\Provider.inc` — shared compact UI.
 - `rainmeter\AIUsage\@Resources\Gauge.inc` — shared gauge variant UI.
