@@ -47,6 +47,7 @@ if ([regex]::Matches($gauge, '(?m)^Solid=1$').Count -ne 4) { throw 'Gauge Roundl
 if ($gauge -notmatch '(?ms)^\[MeterFiveHourGauge\]\s*.*?^MeasureName=MeasureFiveHour\s*.*?^StartAngle=\(Rad\(135\)\)\s*.*?^RotationAngle=\(Rad\(270\)\)\s*.*?^LineWidth=8\s*$') { throw 'Five-hour gauge ring binding is incorrect.' }
 if ($gauge -notmatch '(?ms)^\[MeterWeeklyGauge\]\s*.*?^MeasureName=MeasureWeekly\s*.*?^StartAngle=\(Rad\(135\)\)\s*.*?^RotationAngle=\(Rad\(270\)\)\s*.*?^LineWidth=8\s*$') { throw 'Weekly gauge ring binding is incorrect.' }
 if ($gauge -notmatch '(?m)^Text=5H$' -or $gauge -notmatch '(?m)^Text=7D$') { throw 'Gauge variant must use 5H and 7D labels.' }
+if ($gauge -notmatch '(?ms)^\[MeterFiveHourValue\]\s*.*?^Y=90\s*.*?^FontSize=18\s*.*?^Text=%1%$' -or $gauge -notmatch '(?ms)^\[MeterWeeklyValue\]\s*.*?^Y=90\s*.*?^FontSize=18\s*.*?^Text=%1%$') { throw 'Gauge percentage values must use the smaller centered text size.' }
 foreach ($color in @('255,77,79,255', '255,152,0,255', '255,210,30,255', '154,205,50,255', '46,204,113,255')) {
     if ($lua -notmatch [regex]::Escape($color)) { throw "Missing quota color $color." }
 }

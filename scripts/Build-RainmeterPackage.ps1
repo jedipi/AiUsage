@@ -11,8 +11,8 @@ try {
     Copy-Item -LiteralPath (Join-Path $root 'scripts\Update-AiUsage.ps1') -Destination (Join-Path $skinDestination '@Resources\Update-AiUsage.ps1') -Force
     Copy-Item -LiteralPath (Join-Path $root 'rainmeter\RMSKIN.ini') -Destination (Join-Path $staging 'RMSKIN.ini')
     New-Item -ItemType Directory -Path $OutputDirectory -Force | Out-Null
-    $zipPath = Join-Path $OutputDirectory 'AIUsage_0.2.12.zip'
-    $packagePath = Join-Path $OutputDirectory 'AIUsage_0.2.12.rmskin'
+    $zipPath = Join-Path $OutputDirectory 'AIUsage_0.2.13.zip'
+    $packagePath = Join-Path $OutputDirectory 'AIUsage_0.2.13.rmskin'
     if (Test-Path -LiteralPath $zipPath) { Remove-Item -LiteralPath $zipPath -Force }
     if (Test-Path -LiteralPath $packagePath) { Remove-Item -LiteralPath $packagePath -Force }
     Compress-Archive -Path (Join-Path $staging '*') -DestinationPath $zipPath -CompressionLevel Optimal

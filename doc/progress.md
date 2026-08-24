@@ -1,6 +1,6 @@
 # TokenMeter Progress
 
-Last updated: 2026-08-23
+Last updated: 2026-08-24
 
 ## Current status
 
@@ -102,12 +102,12 @@ Rainmeter reads `usage.cache`. The JSON file remains the canonical structured ca
 
 The latest package is:
 
-[AIUsage_0.2.12.rmskin](../dist/AIUsage_0.2.12.rmskin)
+[AIUsage_0.2.13.rmskin](../dist/AIUsage_0.2.13.rmskin)
 
 SHA-256:
 
 ```text
-DA27FA3221D0D5D24663F982FD95AE6D970094BCA964064CB8B2F8C8306BAE5B
+796E95094142F24BF2291B8C045AFA287B59BA41A17E0CAC91C273C889122746
 ```
 
 The package contains the required Rainmeter footer and is validated by `Test-RainmeterPackage.ps1`.
