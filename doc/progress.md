@@ -43,7 +43,7 @@ The old combined skin was preserved as `AIUsage\AIUsage.combined.ini.bak`.
 - Codex Unix reset timestamps are converted to ISO timestamps in `usage.json` and readable local strings in `usage.cache`.
 - Codex quota display uses remaining capacity (`100 - used_percent`) to match the Codex UI.
 - Claude Code quota data is read from Claude status-line JSON and does not read OAuth credentials.
-- Google Antigravity quota data is read from its documented status-line `quota` object and does not read credentials, prompts, responses, or transcripts.
+- Google Antigravity quota data is read from its documented status-line `quota` object, grouped into weekly Gemini and Claude/GPT model pools, and does not read credentials, prompts, responses, or transcripts.
 - Cache writes are atomic.
 
 ### Rainmeter UI
@@ -52,7 +52,7 @@ The old combined skin was preserved as `AIUsage\AIUsage.combined.ini.bak`.
 - All three skins share `rainmeter\AIUsage\@Resources\Provider.inc` and `Usage.lua`.
 - The compact card is currently `270 × 180`.
 - Each provider also has a `Gauge.ini` variant using the shared `@Resources\Gauge.inc`; it is a compact `270 × 180` card with two side-by-side 270-degree solid quota rings matching the supplied reference image.
-- The gauge variant keeps the existing provider title bar and refresh action, adds `QUOTA REMAINING`, shows `5H`/`7D` labels with their respective `In <reset date time>` values, and updates ring and percentage colors through `Usage.lua`.
+- The gauge variant keeps the existing provider title bar and refresh action, adds `QUOTA REMAINING`, uses provider-specific labels, and updates ring and percentage colors through `Usage.lua`.
 - `REFRESH` is positioned in the top-right, the divider is removed, and the bottom spacing is tightened.
 - Time meter was removed.
 - `LOCAL CACHE` text was removed.
@@ -60,6 +60,7 @@ The old combined skin was preserved as `AIUsage\AIUsage.combined.ini.bak`.
 
   - `5H  In <five-hour reset time>`
   - `W   In <weekly reset time>`
+  - Antigravity: `GEMINI  In <weekly reset time>` and `CLAUDE/GPT  In <weekly reset time>`
 
 - A launcher loads all three skins and positions them at startup.
 - Rainmeter installation/loading is a one-time post-plugin setup command; Codex and Claude lifecycle hooks refresh quota data, while Antigravity's status-line adapter is the authoritative refresh path.
@@ -91,7 +92,7 @@ The collector writes:
 
 Rainmeter reads `usage.cache`. The JSON file remains the canonical structured cache.
 
-The cache includes an `antigravity` provider. Antigravity bucket IDs and reset durations are classified into five-hour and weekly windows; when multiple buckets map to one window, the lowest remaining quota is displayed.
+The cache includes an `antigravity` provider with `gemini` and `claudeGpt` weekly model pools. Five-hour Antigravity bucket IDs are ignored; when multiple weekly buckets map to one model pool, the lowest remaining quota is displayed.
 
 ## Important source files
 
@@ -112,12 +113,12 @@ The cache includes an `antigravity` provider. Antigravity bucket IDs and reset d
 
 The latest package is:
 
-[AIUsage_0.2.14.rmskin](../dist/AIUsage_0.2.14.rmskin)
+[AIUsage_0.2.15.rmskin](../dist/AIUsage_0.2.15.rmskin)
 
 SHA-256:
 
 ```text
-184D5E798B1C7E3D4549FB0002BD7B1F0F07B1816E31E51EF145B38F8911F937
+B75793FB74FB8FB9D3A2F99B59F3CAAF15FCE8E13B59FE87B7FE0341F6C157A2
 ```
 
 The package contains the required Rainmeter footer and is validated by `Test-RainmeterPackage.ps1`.
@@ -135,7 +136,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\Build-Rainmete
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\Test-RainmeterPackage.ps1
 ```
 
-The tests cover split skins, gauge variants, reset-window mapping, Antigravity status-line quota parsing, compact dimensions, title-bar placement, hidden refresh execution, dynamic bar and ring color rules, cache parsing, atomic package footer structure, and package entries.
+The tests cover split skins, gauge variants, reset-window mapping, Antigravity weekly model-pool parsing and cache migration, compact dimensions, title-bar placement, hidden refresh execution, dynamic bar and ring color rules, cache parsing, atomic package footer structure, and package entries.
 
 ## Installation state
 

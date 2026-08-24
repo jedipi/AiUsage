@@ -1,6 +1,6 @@
 # TokenMeter
 
-An agent usage-limit dashboard for Codex, Claude Code, Google Antigravity, and Rainmeter. It reads quota metadata, the supported agent integrations keep it fresh, and native Rainmeter skins render five-hour and weekly limits.
+An agent usage-limit dashboard for Codex, Claude Code, Google Antigravity, and Rainmeter. It reads quota metadata, the supported agent integrations keep it fresh, and native Rainmeter skins render each provider's quota pools.
 
 ## What is included
 
@@ -67,7 +67,7 @@ Then install the status-line adapter once from the repository clone:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\Install-AntigravityStatusLine.ps1
 ```
 
-The installer configures `~\.gemini\antigravity-cli\settings.json`, keeps Antigravity's built-in status line using `stack_with_default`, and stops if a different custom status line is already configured. The adapter reads only the documented `quota` object and writes the shared `%LOCALAPPDATA%\AiUsage` cache. See the [Antigravity plugin documentation](https://antigravity.google/docs/cli/plugins) and [status-line quota schema](https://antigravity.google/docs/cli/statusline) for the supported integration points.
+The installer configures `~\.gemini\antigravity-cli\settings.json`, keeps Antigravity's built-in status line using `stack_with_default`, and stops if a different custom status line is already configured. The adapter reads only the documented `quota` object and writes the shared `%LOCALAPPDATA%\AiUsage` cache. The Antigravity skin displays two weekly model pools—`GEMINI` and `CLAUDE/GPT`—and ignores five-hour bucket IDs. See the [Antigravity plugin documentation](https://antigravity.google/docs/cli/plugins) and [status-line quota schema](https://antigravity.google/docs/cli/statusline) for the supported integration points.
 
 ### Rainmeter
 
@@ -90,4 +90,4 @@ To rebuild the installer, run `scripts\Build-RainmeterPackage.ps1`. The builder 
 - Requires Windows PowerShell 5.1+ and Rainmeter 4.5+.
 - Codex weekly data can be absent when the current session snapshot has no secondary rate-limit window.
 - Claude quota status-line fields are available to Claude.ai Pro/Max accounts and may be absent before the first response.
-- Antigravity quota values are available after its status line has received a payload containing `quota`; buckets are classified by their documented reset metadata and bucket name.
+- Antigravity quota values are available after its status line has received a payload containing `quota`; weekly buckets are grouped into Gemini and Claude/GPT model pools by bucket ID.

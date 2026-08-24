@@ -4,7 +4,7 @@ MinValue=0
 MaxValue=100
 ScriptFile=#@#Usage.lua
 Provider=#Provider#
-Window=fiveHour
+Window=#PrimaryWindow#
 Field=usedPercent
 UpdateDivider=15
 
@@ -14,7 +14,7 @@ MinValue=0
 MaxValue=100
 ScriptFile=#@#Usage.lua
 Provider=#Provider#
-Window=weekly
+Window=#SecondaryWindow#
 Field=usedPercent
 UpdateDivider=15
 
@@ -22,7 +22,7 @@ UpdateDivider=15
 Measure=Script
 ScriptFile=#@#Usage.lua
 Provider=#Provider#
-Window=fiveHour
+Window=#PrimaryWindow#
 Field=resetAt
 UpdateDivider=15
 
@@ -30,7 +30,7 @@ UpdateDivider=15
 Measure=Script
 ScriptFile=#@#Usage.lua
 Provider=#Provider#
-Window=weekly
+Window=#SecondaryWindow#
 Field=resetAt
 UpdateDivider=15
 
@@ -69,14 +69,14 @@ FontFace=#FontFace#
 FontSize=9
 FontColor=#Muted#
 AntiAlias=1
-Text=5H
+Text=#PrimaryLabel#
 
 [MeterFiveHourReset]
 Meter=String
 MeasureName=MeasureFiveHourReset
-X=46
+X=#PrimaryResetX#
 Y=69
-W=142
+W=#PrimaryResetWidth#
 ClipString=1
 FontFace=#FontFace#
 FontSize=8
@@ -120,14 +120,14 @@ FontFace=#FontFace#
 FontSize=9
 FontColor=#Muted#
 AntiAlias=1
-Text=W
+Text=#SecondaryLabel#
 
 [MeterWeeklyReset]
 Meter=String
 MeasureName=MeasureWeeklyReset
-X=38
+X=#SecondaryResetX#
 Y=130
-W=142
+W=#SecondaryResetWidth#
 ClipString=1
 FontFace=#FontFace#
 FontSize=8

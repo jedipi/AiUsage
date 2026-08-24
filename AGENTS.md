@@ -40,7 +40,7 @@ Rainmeter reads `usage.cache`; `usage.json` is the structured canonical cache.
 
 Codex data is obtained from the latest local JSONL `event_msg` / `token_count` record containing `payload.rate_limits`. Read quota metadata only; conversation prompts and responses are outside this feature.
 
-Antigravity data is obtained from the documented status-line JSON `quota` object. Read `remaining_fraction`, `reset_time`, and `reset_in_seconds` only; credentials, prompts, responses, and transcripts are outside this feature.
+Antigravity data is obtained from the documented status-line JSON `quota` object. Read `remaining_fraction`, `reset_time`, and `reset_in_seconds` only; credentials, prompts, responses, and transcripts are outside this feature. Map weekly Gemini bucket IDs to `antigravity.gemini`, map weekly Claude/GPT/third-party bucket IDs to `antigravity.claudeGpt`, and ignore Antigravity five-hour bucket IDs.
 
 Codex windows are selected by `window_minutes`:
 
@@ -60,7 +60,8 @@ Keep Codex, Claude, and Antigravity as separate skins with shared implementation
 Current compact layout contract:
 
 - card size: `270 × 180`;
-- row labels: `5H` and `W`;
+- Codex/Claude row labels: `5H` and `W`;
+- Antigravity row labels: `GEMINI` and `CLAUDE/GPT`;
 - reset text: `In <reset time>` immediately after the corresponding row label;
 - no time meter;
 - no `LOCAL CACHE` label;

@@ -17,13 +17,33 @@ function New-Provider {
     [ordered]@{ available = $false; fiveHour = (New-Window); weekly = (New-Window); updatedAt = ''; error = '' }
 }
 
+function New-AntigravityProvider {
+    [ordered]@{ available = $false; gemini = (New-Window); claudeGpt = (New-Window); updatedAt = ''; error = '' }
+}
+
 function Ensure-Provider($Cache, [string]$Name) {
+    $newProvider = if ($Name -eq 'antigravity') { New-AntigravityProvider } else { New-Provider }
     if ($Cache -is [System.Collections.IDictionary]) {
-        if (-not $Cache.Contains($Name)) { $Cache[$Name] = New-Provider }
+        if (-not $Cache.Contains($Name)) { $Cache[$Name] = $newProvider }
         return
     }
     if ($null -eq (Get-Property $Cache $Name)) {
-        $Cache | Add-Member -NotePropertyName $Name -NotePropertyValue (New-Provider)
+        $Cache | Add-Member -NotePropertyName $Name -NotePropertyValue $newProvider
+    }
+}
+
+function Ensure-AntigravityPools($Cache) {
+    $provider = if ($Cache -is [System.Collections.IDictionary]) { $Cache['antigravity'] } else { Get-Property $Cache 'antigravity' }
+    if ($provider -is [System.Collections.IDictionary]) {
+        if (-not $provider.Contains('gemini')) { $provider['gemini'] = New-Window }
+        if (-not $provider.Contains('claudeGpt')) { $provider['claudeGpt'] = New-Window }
+        return
+    }
+    if ($null -eq (Get-Property $provider 'gemini')) {
+        $provider | Add-Member -NotePropertyName gemini -NotePropertyValue (New-Window)
+    }
+    if ($null -eq (Get-Property $provider 'claudeGpt')) {
+        $provider | Add-Member -NotePropertyName claudeGpt -NotePropertyValue (New-Window)
     }
 }
 
@@ -111,12 +131,11 @@ function Convert-AntigravityWindow($Window) {
     New-Window ([math]::Min(100, [math]::Max(0, $remaining * 100)))
 }
 
-function Get-AntigravityWindowName([string]$BucketName, [double]$ResetInSeconds) {
+function Get-AntigravityPoolName([string]$BucketName) {
     $name = $BucketName.ToLowerInvariant()
-    if ($name -match 'weekly|seven.?day|7d|week') { return 'weekly' }
-    if ($name -match 'five.?hour|5h|hour') { return 'fiveHour' }
-    if ($ResetInSeconds -ge 86400) { return 'weekly' }
-    if ($ResetInSeconds -gt 0 -and $ResetInSeconds -le 21600) { return 'fiveHour' }
+    if ($name -match 'five.?hour|5h') { return '' }
+    if ($name -match 'gemini') { return 'gemini' }
+    if ($name -match 'claude|gpt|third.?party') { return 'claudeGpt' }
     return ''
 }
 
@@ -125,7 +144,7 @@ function Read-Cache([string]$Path) {
         try { return Get-Content -Raw -LiteralPath $Path | ConvertFrom-Json }
         catch { }
     }
-    [ordered]@{ schemaVersion = 1; updatedAt = ''; codex = (New-Provider); claude = (New-Provider); antigravity = (New-Provider) }
+    [ordered]@{ schemaVersion = 1; updatedAt = ''; codex = (New-Provider); claude = (New-Provider); antigravity = (New-AntigravityProvider) }
 }
 
 function Update-Codex($Cache) {
@@ -216,34 +235,34 @@ function Update-Antigravity($Cache, [string]$Json) {
         return
     }
 
-    $fiveHour = New-Window
-    $weekly = New-Window
-    $hasFiveHour = $false
-    $hasWeekly = $false
+    $gemini = New-Window
+    $claudeGpt = New-Window
+    $hasGemini = $false
+    $hasClaudeGpt = $false
     foreach ($property in @($quota.PSObject.Properties)) {
         $converted = Convert-AntigravityWindow $property.Value
         if ($null -eq $converted) { continue }
         $reset = Convert-AntigravityReset $property.Value
-        $windowName = Get-AntigravityWindowName $property.Name $reset.resetInSeconds
-        if ([string]::IsNullOrWhiteSpace($windowName)) { continue }
+        $poolName = Get-AntigravityPoolName $property.Name
+        if ([string]::IsNullOrWhiteSpace($poolName)) { continue }
         $candidate = [ordered]@{ usedPercent = $converted.usedPercent; resetAt = $reset.resetAt }
-        if ($windowName -eq 'fiveHour' -and (-not $hasFiveHour -or $candidate.usedPercent -lt $fiveHour.usedPercent)) {
-            $fiveHour = $candidate
-            $hasFiveHour = $true
+        if ($poolName -eq 'gemini' -and (-not $hasGemini -or $candidate.usedPercent -lt $gemini.usedPercent)) {
+            $gemini = $candidate
+            $hasGemini = $true
         }
-        if ($windowName -eq 'weekly' -and (-not $hasWeekly -or $candidate.usedPercent -lt $weekly.usedPercent)) {
-            $weekly = $candidate
-            $hasWeekly = $true
+        if ($poolName -eq 'claudeGpt' -and (-not $hasClaudeGpt -or $candidate.usedPercent -lt $claudeGpt.usedPercent)) {
+            $claudeGpt = $candidate
+            $hasClaudeGpt = $true
         }
     }
-    if (-not $hasFiveHour -and -not $hasWeekly) {
-        $Cache.antigravity.error = 'No Antigravity quota window found'
+    if (-not $hasGemini -and -not $hasClaudeGpt) {
+        $Cache.antigravity.error = 'No Antigravity model quota pool found'
         return
     }
     $Cache.antigravity = [ordered]@{
         available = $true
-        fiveHour = $fiveHour
-        weekly = $weekly
+        gemini = $gemini
+        claudeGpt = $claudeGpt
         updatedAt = [DateTimeOffset]::UtcNow.ToString('o')
         error = ''
     }
@@ -255,6 +274,7 @@ $cache = Read-Cache $jsonPath
 Ensure-Provider $cache 'codex'
 Ensure-Provider $cache 'claude'
 Ensure-Provider $cache 'antigravity'
+Ensure-AntigravityPools $cache
 if ($Source -in @('Auto', 'Codex')) { Update-Codex $cache }
 if ($Source -eq 'ClaudeStatus') {
     $statusJson = $InputJson
@@ -287,10 +307,10 @@ $lines = @(
     "claude.weekly.usedPercent=$($cache.claude.weekly.usedPercent)",
     "claude.weekly.resetAt=$(Format-ResetForDisplay ([string]$cache.claude.weekly.resetAt))",
     "antigravity.available=$($cache.antigravity.available.ToString().ToLowerInvariant())",
-    "antigravity.fiveHour.usedPercent=$($cache.antigravity.fiveHour.usedPercent)",
-    "antigravity.fiveHour.resetAt=$(Format-ResetForDisplay ([string]$cache.antigravity.fiveHour.resetAt))",
-    "antigravity.weekly.usedPercent=$($cache.antigravity.weekly.usedPercent)",
-    "antigravity.weekly.resetAt=$(Format-ResetForDisplay ([string]$cache.antigravity.weekly.resetAt))"
+    "antigravity.gemini.usedPercent=$($cache.antigravity.gemini.usedPercent)",
+    "antigravity.gemini.resetAt=$(Format-ResetForDisplay ([string]$cache.antigravity.gemini.resetAt))",
+    "antigravity.claudeGpt.usedPercent=$($cache.antigravity.claudeGpt.usedPercent)",
+    "antigravity.claudeGpt.resetAt=$(Format-ResetForDisplay ([string]$cache.antigravity.claudeGpt.resetAt))"
 )
 $lines | Set-Content -LiteralPath $flatTemp -Encoding utf8
 Move-Item -LiteralPath $flatTemp -Destination $flatPath -Force

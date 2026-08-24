@@ -4,7 +4,7 @@ MinValue=0
 MaxValue=100
 ScriptFile=#@#Usage.lua
 Provider=#Provider#
-Window=fiveHour
+Window=#PrimaryWindow#
 Field=usedPercent
 UpdateDivider=15
 
@@ -14,7 +14,7 @@ MinValue=0
 MaxValue=100
 ScriptFile=#@#Usage.lua
 Provider=#Provider#
-Window=weekly
+Window=#SecondaryWindow#
 Field=usedPercent
 UpdateDivider=15
 
@@ -22,7 +22,7 @@ UpdateDivider=15
 Measure=Script
 ScriptFile=#@#Usage.lua
 Provider=#Provider#
-Window=fiveHour
+Window=#PrimaryWindow#
 Field=resetAt
 UpdateDivider=15
 
@@ -30,7 +30,7 @@ UpdateDivider=15
 Measure=Script
 ScriptFile=#@#Usage.lua
 Provider=#Provider#
-Window=weekly
+Window=#SecondaryWindow#
 Field=resetAt
 UpdateDivider=15
 
@@ -186,7 +186,7 @@ FontSize=9
 FontWeight=600
 FontColor=#GaugeFiveHourLabelColor#
 AntiAlias=1
-Text=5H
+Text=#PrimaryLabel#
 
 [MeterWeeklyLabel]
 Meter=String
@@ -198,7 +198,7 @@ FontSize=9
 FontWeight=600
 FontColor=#GaugeWeeklyLabelColor#
 AntiAlias=1
-Text=7D
+Text=#SecondaryLabel#
 
 [MeterFiveHourReset]
 Meter=String

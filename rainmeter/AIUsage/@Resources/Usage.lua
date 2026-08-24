@@ -9,20 +9,20 @@ local function quotaColor(percent)
 end
 
 local function barMeterName(providerName, windowName)
-    if windowName == 'fiveHour' then return 'MeterFiveHourBar' end
-    if windowName == 'weekly' then return 'MeterWeeklyBar' end
+    if windowName == 'fiveHour' or windowName == 'gemini' then return 'MeterFiveHourBar' end
+    if windowName == 'weekly' or windowName == 'claudeGpt' then return 'MeterWeeklyBar' end
     return nil
 end
 
 local function gaugeMeterName(windowName)
-    if windowName == 'fiveHour' then return 'MeterFiveHourGauge' end
-    if windowName == 'weekly' then return 'MeterWeeklyGauge' end
+    if windowName == 'fiveHour' or windowName == 'gemini' then return 'MeterFiveHourGauge' end
+    if windowName == 'weekly' or windowName == 'claudeGpt' then return 'MeterWeeklyGauge' end
     return nil
 end
 
 local function gaugeValueMeterName(windowName)
-    if windowName == 'fiveHour' then return 'MeterFiveHourValue' end
-    if windowName == 'weekly' then return 'MeterWeeklyValue' end
+    if windowName == 'fiveHour' or windowName == 'gemini' then return 'MeterFiveHourValue' end
+    if windowName == 'weekly' or windowName == 'claudeGpt' then return 'MeterWeeklyValue' end
     return nil
 end
 

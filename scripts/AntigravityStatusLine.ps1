@@ -17,14 +17,22 @@ $collector = Join-Path $PSScriptRoot 'Update-AiUsage.ps1'
 try {
     $payload = $InputJson | ConvertFrom-Json
     $quota = $payload.quota
-    $summary = foreach ($property in @($quota.PSObject.Properties)) {
+    $pools = @{}
+    foreach ($property in @($quota.PSObject.Properties)) {
+        $bucketName = $property.Name.ToLowerInvariant()
+        if ($bucketName -match 'five.?hour|5h') { continue }
+        $poolName = if ($bucketName -match 'gemini') { 'Gemini W' } elseif ($bucketName -match 'claude|gpt|third.?party') { 'Claude/GPT W' } else { '' }
+        if ([string]::IsNullOrWhiteSpace($poolName)) { continue }
         $remaining = $property.Value.remaining_fraction
         if ($null -eq $remaining) { $remaining = $property.Value.remaining_percentage }
         if ($null -eq $remaining) { $remaining = $property.Value.remaining_percent }
         if ($null -eq $remaining) { continue }
         $percent = [double]$remaining
         if ($percent -le 1) { $percent *= 100 }
-        '{0} {1:0}%' -f $property.Name, $percent
+        if (-not $pools.ContainsKey($poolName) -or $percent -lt $pools[$poolName]) { $pools[$poolName] = $percent }
+    }
+    $summary = foreach ($poolName in @('Gemini W', 'Claude/GPT W')) {
+        if ($pools.ContainsKey($poolName)) { '{0} {1:0}%' -f $poolName, $pools[$poolName] }
     }
     if (@($summary).Count -gt 0) {
         Write-Output ('TokenMeter: ' + (@($summary) -join ' | '))
