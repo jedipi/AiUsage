@@ -24,9 +24,12 @@ foreach ($file in @('Update-AiUsage.ps1', 'AntigravityStatusLine.ps1', 'Antigrav
 }
 
 $installedScript = Join-Path $installedDirectory 'AntigravityStatusLine.ps1'
+$encodedScript = [Convert]::ToBase64String(
+    [Text.Encoding]::Unicode.GetBytes("`$ProgressPreference = 'SilentlyContinue'; & '$($installedScript.Replace("'", "''"))'")
+)
 $statusLine = [pscustomobject]@{
     type = 'command'
-    command = "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File `"$($installedScript.Replace('\', '/'))`""
+    command = "powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -OutputFormat Text -EncodedCommand $encodedScript"
     padding = 0
     stack_with_default = $true
 }
@@ -34,7 +37,16 @@ $statusLine = [pscustomobject]@{
 $statusLineProperty = $settings.PSObject.Properties['statusLine']
 if ($null -ne $statusLineProperty) {
     $existingCommand = [string]$settings.statusLine.command
-    if (-not [string]::IsNullOrWhiteSpace($existingCommand) -and $existingCommand -notlike '*AntigravityStatusLine.ps1*') {
+    $isTokenMeterCommand = $existingCommand -like '*AntigravityStatusLine.ps1*'
+    $encodedCommandMatch = [regex]::Match($existingCommand, '(?i)(?:^|\s)-EncodedCommand\s+(?<payload>[A-Za-z0-9+/=]+)\s*$')
+    if (-not $isTokenMeterCommand -and $encodedCommandMatch.Success) {
+        try {
+            $decodedCommand = [Text.Encoding]::Unicode.GetString([Convert]::FromBase64String($encodedCommandMatch.Groups['payload'].Value))
+            $isTokenMeterCommand = $decodedCommand -like '*AntigravityStatusLine.ps1*'
+        }
+        catch { }
+    }
+    if (-not [string]::IsNullOrWhiteSpace($existingCommand) -and -not $isTokenMeterCommand) {
         throw 'A different Antigravity statusLine is already configured. Merge the generated command manually to avoid replacing your existing status line.'
     }
     $settings.statusLine = $statusLine
@@ -44,6 +56,7 @@ else {
 }
 
 $temp = "$SettingsPath.tmp"
-$settings | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $temp -Encoding utf8
+$settingsJson = $settings | ConvertTo-Json -Depth 20
+[IO.File]::WriteAllText($temp, $settingsJson, (New-Object Text.UTF8Encoding($false)))
 Move-Item -LiteralPath $temp -Destination $SettingsPath -Force
 Write-Host "Antigravity status line installed in $SettingsPath"

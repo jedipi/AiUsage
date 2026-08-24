@@ -44,6 +44,8 @@ The old combined skin was preserved as `AIUsage\AIUsage.combined.ini.bak`.
 - Codex quota display uses remaining capacity (`100 - used_percent`) to match the Codex UI.
 - Claude Code quota data is read from Claude status-line JSON and does not read OAuth credentials.
 - Google Antigravity quota data is read from its documented status-line `quota` object, grouped into weekly Gemini and Claude/GPT model pools, and does not read credentials, prompts, responses, or transcripts.
+- Antigravity's abbreviated `3p-weekly` bucket is mapped to the Claude/GPT pool alongside explicit Claude, GPT, and third-party bucket names.
+- The Antigravity status-line installer writes BOM-free UTF-8 settings and uses an encoded PowerShell command, avoiding both Antigravity's strict JSON parser and its Windows argument-tokenization issue with quoted `-File` paths.
 - Cache writes are atomic.
 
 ### Rainmeter UI
@@ -113,12 +115,12 @@ The cache includes an `antigravity` provider with `gemini` and `claudeGpt` weekl
 
 The latest package is:
 
-[AIUsage_0.2.15.rmskin](../dist/AIUsage_0.2.15.rmskin)
+[AIUsage_0.2.17.rmskin](../dist/AIUsage_0.2.17.rmskin)
 
 SHA-256:
 
 ```text
-B75793FB74FB8FB9D3A2F99B59F3CAAF15FCE8E13B59FE87B7FE0341F6C157A2
+A0C317795697A45C22C16A3B77B5520D78A326165046BF11E6A435358F19B5AE
 ```
 
 The package contains the required Rainmeter footer and is validated by `Test-RainmeterPackage.ps1`.

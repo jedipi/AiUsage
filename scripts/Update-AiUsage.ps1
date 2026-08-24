@@ -135,7 +135,7 @@ function Get-AntigravityPoolName([string]$BucketName) {
     $name = $BucketName.ToLowerInvariant()
     if ($name -match 'five.?hour|5h') { return '' }
     if ($name -match 'gemini') { return 'gemini' }
-    if ($name -match 'claude|gpt|third.?party') { return 'claudeGpt' }
+    if ($name -match 'claude|gpt|third.?party|(^|[-_.])3p($|[-_.])') { return 'claudeGpt' }
     return ''
 }
 

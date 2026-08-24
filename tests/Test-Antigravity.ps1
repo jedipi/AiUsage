@@ -26,6 +26,7 @@ try {
             'gemini-weekly-pro' = @{ remaining_fraction = 0.84; reset_in_seconds = 900000 }
             'claude-gpt-weekly' = @{ remaining_fraction = 0.76; reset_time = '2026-08-29T00:00:00Z' }
             'claude-weekly-secondary' = @{ remaining_fraction = 0.82; reset_in_seconds = 800000 }
+            '3p-weekly' = @{ remaining_fraction = 0.61; reset_time = '2026-08-30T00:00:00Z' }
             'gpt-five-hour' = @{ remaining_fraction = 0.15; reset_in_seconds = 5400 }
         }
     } | ConvertTo-Json -Depth 5 -Compress
@@ -34,12 +35,12 @@ try {
     $result = Get-Content -Raw -LiteralPath (Join-Path $testCache 'usage.json') | ConvertFrom-Json
     if (-not $result.antigravity.available) { throw 'Antigravity should be available.' }
     if ($result.antigravity.gemini.usedPercent -ne 84) { throw "Expected the lowest Gemini weekly quota, got $($result.antigravity.gemini.usedPercent)." }
-    if ($result.antigravity.claudeGpt.usedPercent -ne 76) { throw "Expected the lowest Claude/GPT weekly quota, got $($result.antigravity.claudeGpt.usedPercent)." }
+    if ($result.antigravity.claudeGpt.usedPercent -ne 61) { throw "Expected the lowest Claude/GPT weekly quota, got $($result.antigravity.claudeGpt.usedPercent)." }
     if ($result.antigravity.gemini.resetAt -notmatch '^\d{4}-\d{2}-\d{2}T') { throw 'Gemini weekly reset time was not normalized to ISO.' }
     if ($null -ne $result.antigravity.fiveHour -or $null -ne $result.antigravity.weekly) { throw 'Antigravity must not expose five-hour/weekly time-window fields.' }
     $flat = Get-Content -Raw -LiteralPath (Join-Path $testCache 'usage.cache')
     if ($flat -notmatch 'antigravity\.gemini\.usedPercent=84') { throw 'Antigravity Gemini cache value is missing.' }
-    if ($flat -notmatch 'antigravity\.claudeGpt\.usedPercent=76') { throw 'Antigravity Claude/GPT cache value is missing.' }
+    if ($flat -notmatch 'antigravity\.claudeGpt\.usedPercent=61') { throw 'Antigravity Claude/GPT cache value is missing.' }
     if ($flat -match 'antigravity\.(fiveHour|weekly)\.') { throw 'Antigravity cache must not expose a five-hour row.' }
 
     $manifest = Get-Content -Raw -LiteralPath (Join-Path $root '.agents\plugins\tokenmeter\plugin.json') | ConvertFrom-Json
@@ -51,15 +52,29 @@ try {
 
     $env:LOCALAPPDATA = $testInstall
     & (Join-Path $root 'scripts\Install-AntigravityStatusLine.ps1') -PluginRoot $root -SettingsPath $testSettings
+    $settingsBytes = [IO.File]::ReadAllBytes($testSettings)
+    if ($settingsBytes.Length -ge 3 -and $settingsBytes[0] -eq 0xEF -and $settingsBytes[1] -eq 0xBB -and $settingsBytes[2] -eq 0xBF) {
+        throw 'Antigravity settings must use UTF-8 without a byte-order mark.'
+    }
     $settings = Get-Content -Raw -LiteralPath $testSettings | ConvertFrom-Json
-    if ($settings.statusLine.stack_with_default -ne $true) { throw 'Antigravity installer must preserve the built-in status line.' }
-    if ($settings.statusLine.command -notmatch 'AntigravityStatusLine\.ps1') { throw 'Antigravity status-line command is missing.' }
     $installedDirectory = Join-Path $testInstall 'AiUsage'
+    if ($settings.statusLine.stack_with_default -ne $true) { throw 'Antigravity installer must preserve the built-in status line.' }
+    $encodedCommandMatch = [regex]::Match($settings.statusLine.command, ' -EncodedCommand (?<payload>[A-Za-z0-9+/=]+)$')
+    if (-not $encodedCommandMatch.Success) { throw 'Antigravity status-line command must avoid quoted -File paths.' }
+    $decodedCommand = [Text.Encoding]::Unicode.GetString([Convert]::FromBase64String($encodedCommandMatch.Groups['payload'].Value))
+    if ($decodedCommand -notlike '*AntigravityStatusLine.ps1*') { throw 'Antigravity status-line command is missing.' }
     foreach ($file in @('Update-AiUsage.ps1', 'AntigravityStatusLine.ps1', 'AntigravityHook.ps1')) {
         if (-not (Test-Path -LiteralPath (Join-Path $installedDirectory $file))) { throw "Antigravity installer did not copy $file." }
     }
-    $statusLineOutput = & (Join-Path $installedDirectory 'AntigravityStatusLine.ps1') -InputJson $fixture
-    if ($statusLineOutput -notmatch 'TokenMeter: Gemini W 84% \| Claude/GPT W 76%') { throw 'Antigravity status-line adapter output is incorrect.' }
+
+    # Antigravity tokenizes the configured command before launching it. Literal
+    # quotes therefore reach powershell.exe as part of the -File path on Windows.
+    $statusLineTokens = @($settings.statusLine.command -split ' ')
+    $statusLineExecutable = $statusLineTokens[0]
+    $statusLineArguments = @($statusLineTokens[1..($statusLineTokens.Count - 1)])
+    $statusLineOutput = $fixture | & $statusLineExecutable @statusLineArguments
+    if ($LASTEXITCODE -ne 0) { throw "Antigravity status-line command exited with $LASTEXITCODE." }
+    if ($statusLineOutput -notmatch 'TokenMeter: Gemini W 84% \| Claude/GPT W 61%') { throw 'Antigravity status-line adapter output is incorrect.' }
     if (-not (Test-Path -LiteralPath (Join-Path $installedDirectory 'usage.cache'))) { throw 'Antigravity status-line adapter did not refresh the cache.' }
 
     Write-Host 'Antigravity quota regression test passed.'

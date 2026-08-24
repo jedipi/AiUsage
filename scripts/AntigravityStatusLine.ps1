@@ -17,11 +17,12 @@ $collector = Join-Path $PSScriptRoot 'Update-AiUsage.ps1'
 try {
     $payload = $InputJson | ConvertFrom-Json
     $quota = $payload.quota
+
     $pools = @{}
     foreach ($property in @($quota.PSObject.Properties)) {
         $bucketName = $property.Name.ToLowerInvariant()
         if ($bucketName -match 'five.?hour|5h') { continue }
-        $poolName = if ($bucketName -match 'gemini') { 'Gemini W' } elseif ($bucketName -match 'claude|gpt|third.?party') { 'Claude/GPT W' } else { '' }
+        $poolName = if ($bucketName -match 'gemini') { 'Gemini W' } elseif ($bucketName -match 'claude|gpt|third.?party|(^|[-_.])3p($|[-_.])') { 'Claude/GPT W' } else { '' }
         if ([string]::IsNullOrWhiteSpace($poolName)) { continue }
         $remaining = $property.Value.remaining_fraction
         if ($null -eq $remaining) { $remaining = $property.Value.remaining_percentage }

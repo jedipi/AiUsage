@@ -1,17 +1,21 @@
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
-$codexSkin = Get-Content -Raw -LiteralPath (Join-Path $root 'rainmeter\AIUsage\Codex\Codex.ini')
-$claudeSkin = Get-Content -Raw -LiteralPath (Join-Path $root 'rainmeter\AIUsage\Claude\Claude.ini')
-$antigravitySkin = Get-Content -Raw -LiteralPath (Join-Path $root 'rainmeter\AIUsage\Antigravity\Antigravity.ini')
-$codexGauge = Get-Content -Raw -LiteralPath (Join-Path $root 'rainmeter\AIUsage\Codex\Gauge.ini')
-$claudeGauge = Get-Content -Raw -LiteralPath (Join-Path $root 'rainmeter\AIUsage\Claude\Gauge.ini')
-$antigravityGauge = Get-Content -Raw -LiteralPath (Join-Path $root 'rainmeter\AIUsage\Antigravity\Gauge.ini')
-$provider = Get-Content -Raw -LiteralPath (Join-Path $root 'rainmeter\AIUsage\@Resources\Provider.inc')
-$gauge = Get-Content -Raw -LiteralPath (Join-Path $root 'rainmeter\AIUsage\@Resources\Gauge.inc')
-$lua = Get-Content -Raw -LiteralPath (Join-Path $root 'rainmeter\AIUsage\@Resources\Usage.lua')
-$codexHooks = Get-Content -Raw -LiteralPath (Join-Path $root 'hooks.json')
-$claudeHooks = Get-Content -Raw -LiteralPath (Join-Path $root 'hooks\hooks.json')
-$rainmeterInstaller = Get-Content -Raw -LiteralPath (Join-Path $root 'scripts\Install-Rainmeter.ps1')
+function Read-NormalizedText([string]$Path) {
+    (Get-Content -Raw -LiteralPath $Path) -replace "`r`n?", "`n"
+}
+
+$codexSkin = Read-NormalizedText (Join-Path $root 'rainmeter\AIUsage\Codex\Codex.ini')
+$claudeSkin = Read-NormalizedText (Join-Path $root 'rainmeter\AIUsage\Claude\Claude.ini')
+$antigravitySkin = Read-NormalizedText (Join-Path $root 'rainmeter\AIUsage\Antigravity\Antigravity.ini')
+$codexGauge = Read-NormalizedText (Join-Path $root 'rainmeter\AIUsage\Codex\Gauge.ini')
+$claudeGauge = Read-NormalizedText (Join-Path $root 'rainmeter\AIUsage\Claude\Gauge.ini')
+$antigravityGauge = Read-NormalizedText (Join-Path $root 'rainmeter\AIUsage\Antigravity\Gauge.ini')
+$provider = Read-NormalizedText (Join-Path $root 'rainmeter\AIUsage\@Resources\Provider.inc')
+$gauge = Read-NormalizedText (Join-Path $root 'rainmeter\AIUsage\@Resources\Gauge.inc')
+$lua = Read-NormalizedText (Join-Path $root 'rainmeter\AIUsage\@Resources\Usage.lua')
+$codexHooks = Read-NormalizedText (Join-Path $root 'hooks.json')
+$claudeHooks = Read-NormalizedText (Join-Path $root 'hooks\hooks.json')
+$rainmeterInstaller = Read-NormalizedText (Join-Path $root 'scripts\Install-Rainmeter.ps1')
 
 if ($codexSkin -notmatch '(?m)^Provider=codex$') { throw 'Codex skin must use the codex provider.' }
 if ($claudeSkin -notmatch '(?m)^Provider=claude$') { throw 'Claude skin must use the claude provider.' }
