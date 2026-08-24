@@ -4,16 +4,21 @@ Last updated: 2026-08-24
 
 ## Current status
 
-The project is implemented as a Windows PowerShell + Rainmeter usage monitor for Codex and Claude Code. The repository now uses a root-level layout; `ai-usage-monitor\` is no longer the source root. The active Rainmeter installation has been updated directly and currently uses two independent provider skins:
+The project is implemented as a Windows PowerShell + Rainmeter usage monitor for Codex, Claude Code, and Google Antigravity. The repository now uses a root-level layout; `ai-usage-monitor\` is no longer the source root. The repository defines three independent provider skins; the active Rainmeter installation remains on the previously installed Codex and Claude skins until the new package is installed.
+
+The source skin layout is:
 
 - `AIUsage\Codex\Codex.ini` and `AIUsage\Codex\Gauge.ini`
 - `AIUsage\Claude\Claude.ini` and `AIUsage\Claude\Gauge.ini`
+- `AIUsage\Antigravity\Antigravity.ini` and `AIUsage\Antigravity\Gauge.ini`
 
 The old combined skin was preserved as `AIUsage\AIUsage.combined.ini.bak`.
 
 ## Repository layout
 
 - `.codex-plugin\plugin.json` — Codex plugin manifest.
+- `.agents\plugins\tokenmeter\plugin.json` — Google Antigravity plugin manifest.
+- `.agents\plugins\tokenmeter\hooks.json` — Google Antigravity lifecycle hook.
 - `.agents\plugins\marketplace.json` — Codex GitHub marketplace catalog.
 - `.claude-plugin\plugin.json` — Claude Code plugin manifest.
 - `.claude-plugin\marketplace.json` — Claude Code GitHub marketplace catalog.
@@ -38,12 +43,13 @@ The old combined skin was preserved as `AIUsage\AIUsage.combined.ini.bak`.
 - Codex Unix reset timestamps are converted to ISO timestamps in `usage.json` and readable local strings in `usage.cache`.
 - Codex quota display uses remaining capacity (`100 - used_percent`) to match the Codex UI.
 - Claude Code quota data is read from Claude status-line JSON and does not read OAuth credentials.
+- Google Antigravity quota data is read from its documented status-line `quota` object and does not read credentials, prompts, responses, or transcripts.
 - Cache writes are atomic.
 
 ### Rainmeter UI
 
-- Codex and Claude are separate, independently movable/unloadable skins.
-- Both skins share `rainmeter\AIUsage\@Resources\Provider.inc` and `Usage.lua`.
+- Codex, Claude, and Antigravity are separate, independently movable/unloadable skins.
+- All three skins share `rainmeter\AIUsage\@Resources\Provider.inc` and `Usage.lua`.
 - The compact card is currently `270 × 180`.
 - Each provider also has a `Gauge.ini` variant using the shared `@Resources\Gauge.inc`; it is a compact `270 × 180` card with two side-by-side 270-degree solid quota rings matching the supplied reference image.
 - The gauge variant keeps the existing provider title bar and refresh action, adds `QUOTA REMAINING`, shows `5H`/`7D` labels with their respective `In <reset date time>` values, and updates ring and percentage colors through `Usage.lua`.
@@ -55,10 +61,10 @@ The old combined skin was preserved as `AIUsage\AIUsage.combined.ini.bak`.
   - `5H  In <five-hour reset time>`
   - `W   In <weekly reset time>`
 
-- A launcher loads both skins and positions them at startup.
-- Rainmeter installation/loading is a one-time post-plugin setup command; Codex and Claude `SessionStart` hooks only refresh quota data.
+- A launcher loads all three skins and positions them at startup.
+- Rainmeter installation/loading is a one-time post-plugin setup command; Codex and Claude lifecycle hooks refresh quota data, while Antigravity's status-line adapter is the authoritative refresh path.
 - Codex refresh uses `wscript.exe` + `RefreshCodex.vbs`, which starts PowerShell hidden so no console window appears.
-- Claude and Codex refresh actions remain independent.
+- Claude, Codex, and Antigravity refresh actions remain independent.
 
 ### Dynamic quota colors
 
@@ -85,10 +91,14 @@ The collector writes:
 
 Rainmeter reads `usage.cache`. The JSON file remains the canonical structured cache.
 
+The cache includes an `antigravity` provider. Antigravity bucket IDs and reset durations are classified into five-hour and weekly windows; when multiple buckets map to one window, the lowest remaining quota is displayed.
+
 ## Important source files
 
 - `scripts\Update-AiUsage.ps1` — shared collector.
 - `scripts\Install-ClaudeStatusLine.ps1` — Claude status-line bootstrap.
+- `scripts\Install-AntigravityStatusLine.ps1` — one-time Antigravity status-line setup.
+- `scripts\AntigravityStatusLine.ps1` — Antigravity quota status-line adapter.
 - `scripts\Install-Rainmeter.ps1` — one-time Rainmeter setup and manual reload.
 - `scripts\Build-RainmeterPackage.ps1` — valid `.rmskin` builder with Rainmeter 4.5 footer.
 - `rainmeter\AIUsage\@Resources\Provider.inc` — shared compact UI.
@@ -102,12 +112,12 @@ Rainmeter reads `usage.cache`. The JSON file remains the canonical structured ca
 
 The latest package is:
 
-[AIUsage_0.2.13.rmskin](../dist/AIUsage_0.2.13.rmskin)
+[AIUsage_0.2.14.rmskin](../dist/AIUsage_0.2.14.rmskin)
 
 SHA-256:
 
 ```text
-796E95094142F24BF2291B8C045AFA287B59BA41A17E0CAC91C273C889122746
+184D5E798B1C7E3D4549FB0002BD7B1F0F07B1816E31E51EF145B38F8911F937
 ```
 
 The package contains the required Rainmeter footer and is validated by `Test-RainmeterPackage.ps1`.
@@ -119,12 +129,13 @@ The following checks pass when run from the repository root:
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\Test-RainmeterBindings.ps1
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\Test-CodexRateLimits.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\Test-Antigravity.ps1
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\Test-Collector.ps1
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\Build-RainmeterPackage.ps1
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\Test-RainmeterPackage.ps1
 ```
 
-The tests cover split skins, gauge variants, reset-window mapping, compact dimensions, title-bar placement, hidden refresh execution, dynamic bar and ring color rules, cache parsing, atomic package footer structure, and package entries.
+The tests cover split skins, gauge variants, reset-window mapping, Antigravity status-line quota parsing, compact dimensions, title-bar placement, hidden refresh execution, dynamic bar and ring color rules, cache parsing, atomic package footer structure, and package entries.
 
 ## Installation state
 
@@ -141,3 +152,4 @@ The current installed files were backed up to `C:\Users\jedi\Documents\Rainmeter
 - If the Codex marketplace copy is older than the repository source, copy the latest plugin source to the personal marketplace and reinstall it with a cachebuster so Codex hooks use the latest collector.
 - Claude quota values require Claude Code's status-line integration and may be unavailable until Claude receives its first response.
 - Codex may expose only a weekly window; in that case the five-hour row correctly displays `NO DATA` while weekly remains populated.
+- Antigravity quota values require the one-time status-line installer and may be unavailable until Antigravity emits a payload containing `quota`.

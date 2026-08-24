@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidateSet('Auto', 'Codex', 'ClaudeStatus')]
+    [ValidateSet('Auto', 'Codex', 'ClaudeStatus', 'AntigravityStatus')]
     [string]$Source = 'Auto',
     [string]$CacheDirectory = (Join-Path $env:LOCALAPPDATA 'AiUsage'),
     [string]$InputJson,
@@ -15,6 +15,16 @@ function New-Window([double]$used = 0, [string]$resetAt = '') {
 
 function New-Provider {
     [ordered]@{ available = $false; fiveHour = (New-Window); weekly = (New-Window); updatedAt = ''; error = '' }
+}
+
+function Ensure-Provider($Cache, [string]$Name) {
+    if ($Cache -is [System.Collections.IDictionary]) {
+        if (-not $Cache.Contains($Name)) { $Cache[$Name] = New-Provider }
+        return
+    }
+    if ($null -eq (Get-Property $Cache $Name)) {
+        $Cache | Add-Member -NotePropertyName $Name -NotePropertyValue (New-Provider)
+    }
 }
 
 function Get-Property($Object, [string]$Name) {
@@ -63,12 +73,59 @@ function Format-ResetForDisplay([string]$ResetAt) {
     catch { return $ResetAt }
 }
 
+function Convert-AntigravityReset($Window) {
+    $reset = Get-Property $Window 'reset_time'
+    $resetInSeconds = Get-Property $Window 'reset_in_seconds'
+    $epoch = 0L
+    if ($null -ne $reset -and [Int64]::TryParse([string]$reset, [ref]$epoch) -and $epoch -ge 1000000000) {
+        $reset = [DateTimeOffset]::FromUnixTimeSeconds($epoch).ToString('o')
+    }
+    if ($null -eq $reset -and $null -ne $resetInSeconds) {
+        $reset = [DateTimeOffset]::UtcNow.AddSeconds([double]$resetInSeconds).ToString('o')
+    }
+    if ($null -ne $reset -and [string]::IsNullOrWhiteSpace([string]$reset) -eq $false) {
+        try {
+            $parsed = [DateTimeOffset]::Parse([string]$reset)
+            $reset = $parsed.ToUniversalTime().ToString('o')
+            if ($null -eq $resetInSeconds) {
+                $resetInSeconds = ($parsed.ToUniversalTime() - [DateTimeOffset]::UtcNow).TotalSeconds
+            }
+        }
+        catch { }
+    }
+    if ($null -eq $reset) { $reset = '' }
+    [pscustomobject]@{
+        resetAt = [string]$reset
+        resetInSeconds = if ($null -ne $resetInSeconds) { [double]$resetInSeconds } else { 0 }
+    }
+}
+
+function Convert-AntigravityWindow($Window) {
+    if ($null -eq $Window) { return $null }
+    $remaining = Get-Property $Window 'remaining_fraction'
+    if ($null -eq $remaining) { $remaining = Get-Property $Window 'remaining_percentage' }
+    if ($null -eq $remaining) { $remaining = Get-Property $Window 'remaining_percent' }
+    if ($null -eq $remaining) { return $null }
+    $remaining = [double]$remaining
+    if ($remaining -gt 1) { $remaining = $remaining / 100 }
+    New-Window ([math]::Min(100, [math]::Max(0, $remaining * 100)))
+}
+
+function Get-AntigravityWindowName([string]$BucketName, [double]$ResetInSeconds) {
+    $name = $BucketName.ToLowerInvariant()
+    if ($name -match 'weekly|seven.?day|7d|week') { return 'weekly' }
+    if ($name -match 'five.?hour|5h|hour') { return 'fiveHour' }
+    if ($ResetInSeconds -ge 86400) { return 'weekly' }
+    if ($ResetInSeconds -gt 0 -and $ResetInSeconds -le 21600) { return 'fiveHour' }
+    return ''
+}
+
 function Read-Cache([string]$Path) {
     if (Test-Path -LiteralPath $Path) {
         try { return Get-Content -Raw -LiteralPath $Path | ConvertFrom-Json }
         catch { }
     }
-    [ordered]@{ schemaVersion = 1; updatedAt = ''; codex = (New-Provider); claude = (New-Provider) }
+    [ordered]@{ schemaVersion = 1; updatedAt = ''; codex = (New-Provider); claude = (New-Provider); antigravity = (New-Provider) }
 }
 
 function Update-Codex($Cache) {
@@ -148,14 +205,66 @@ function Update-Claude($Cache, [string]$Json) {
     }
 }
 
+function Update-Antigravity($Cache, [string]$Json) {
+    try { $payload = $Json | ConvertFrom-Json } catch {
+        $Cache.antigravity.error = 'Invalid Antigravity status-line JSON'
+        return
+    }
+    $quota = Get-Property $payload 'quota'
+    if ($null -eq $quota) {
+        $Cache.antigravity.error = 'Antigravity quota is not present yet'
+        return
+    }
+
+    $fiveHour = New-Window
+    $weekly = New-Window
+    $hasFiveHour = $false
+    $hasWeekly = $false
+    foreach ($property in @($quota.PSObject.Properties)) {
+        $converted = Convert-AntigravityWindow $property.Value
+        if ($null -eq $converted) { continue }
+        $reset = Convert-AntigravityReset $property.Value
+        $windowName = Get-AntigravityWindowName $property.Name $reset.resetInSeconds
+        if ([string]::IsNullOrWhiteSpace($windowName)) { continue }
+        $candidate = [ordered]@{ usedPercent = $converted.usedPercent; resetAt = $reset.resetAt }
+        if ($windowName -eq 'fiveHour' -and (-not $hasFiveHour -or $candidate.usedPercent -lt $fiveHour.usedPercent)) {
+            $fiveHour = $candidate
+            $hasFiveHour = $true
+        }
+        if ($windowName -eq 'weekly' -and (-not $hasWeekly -or $candidate.usedPercent -lt $weekly.usedPercent)) {
+            $weekly = $candidate
+            $hasWeekly = $true
+        }
+    }
+    if (-not $hasFiveHour -and -not $hasWeekly) {
+        $Cache.antigravity.error = 'No Antigravity quota window found'
+        return
+    }
+    $Cache.antigravity = [ordered]@{
+        available = $true
+        fiveHour = $fiveHour
+        weekly = $weekly
+        updatedAt = [DateTimeOffset]::UtcNow.ToString('o')
+        error = ''
+    }
+}
+
 New-Item -ItemType Directory -Path $CacheDirectory -Force | Out-Null
 $jsonPath = Join-Path $CacheDirectory 'usage.json'
 $cache = Read-Cache $jsonPath
+Ensure-Provider $cache 'codex'
+Ensure-Provider $cache 'claude'
+Ensure-Provider $cache 'antigravity'
 if ($Source -in @('Auto', 'Codex')) { Update-Codex $cache }
 if ($Source -eq 'ClaudeStatus') {
     $statusJson = $InputJson
     if ([string]::IsNullOrWhiteSpace($statusJson) -and [Console]::IsInputRedirected) { $statusJson = [Console]::In.ReadToEnd() }
     Update-Claude $cache $statusJson
+}
+if ($Source -eq 'AntigravityStatus') {
+    $statusJson = $InputJson
+    if ([string]::IsNullOrWhiteSpace($statusJson) -and [Console]::IsInputRedirected) { $statusJson = [Console]::In.ReadToEnd() }
+    Update-Antigravity $cache $statusJson
 }
 $cache.updatedAt = [DateTimeOffset]::UtcNow.ToString('o')
 
@@ -176,7 +285,12 @@ $lines = @(
     "claude.fiveHour.usedPercent=$($cache.claude.fiveHour.usedPercent)",
     "claude.fiveHour.resetAt=$(Format-ResetForDisplay ([string]$cache.claude.fiveHour.resetAt))",
     "claude.weekly.usedPercent=$($cache.claude.weekly.usedPercent)",
-    "claude.weekly.resetAt=$(Format-ResetForDisplay ([string]$cache.claude.weekly.resetAt))"
+    "claude.weekly.resetAt=$(Format-ResetForDisplay ([string]$cache.claude.weekly.resetAt))",
+    "antigravity.available=$($cache.antigravity.available.ToString().ToLowerInvariant())",
+    "antigravity.fiveHour.usedPercent=$($cache.antigravity.fiveHour.usedPercent)",
+    "antigravity.fiveHour.resetAt=$(Format-ResetForDisplay ([string]$cache.antigravity.fiveHour.resetAt))",
+    "antigravity.weekly.usedPercent=$($cache.antigravity.weekly.usedPercent)",
+    "antigravity.weekly.resetAt=$(Format-ResetForDisplay ([string]$cache.antigravity.weekly.resetAt))"
 )
 $lines | Set-Content -LiteralPath $flatTemp -Encoding utf8
 Move-Item -LiteralPath $flatTemp -Destination $flatPath -Force

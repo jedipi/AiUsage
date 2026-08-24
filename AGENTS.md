@@ -2,20 +2,25 @@
 
 ## Scope
 
-These instructions apply to the entire repository. This project is a Windows PowerShell collector, a Codex plugin, a Claude Code plugin, and two compact Rainmeter skins.
+These instructions apply to the entire repository. This project is a Windows PowerShell collector, Codex/Claude Code/Google Antigravity plugins, and three compact Rainmeter skins.
 
 For historical decisions, current installation state, package hashes, and the full change record, read [doc/progress.md](doc/progress.md) when the task involves maintenance, troubleshooting, packaging, or UI evolution.
 
 ## Project layout
 
 - `ai-usage-monitor/.codex-plugin/plugin.json` — Codex manifest.
+- `ai-usage-monitor/.agents/plugins/tokenmeter/plugin.json` — Google Antigravity manifest.
+- `ai-usage-monitor/.agents/plugins/tokenmeter/hooks.json` — Google Antigravity lifecycle hook.
 - `ai-usage-monitor/.claude-plugin/plugin.json` — Claude Code manifest.
 - `ai-usage-monitor/hooks.json` — root-level Codex lifecycle hooks.
 - `ai-usage-monitor/hooks/hooks.json` — Claude Code lifecycle hooks.
 - `ai-usage-monitor/scripts/Update-AiUsage.ps1` — shared collector and cache writer.
+- `ai-usage-monitor/scripts/Install-AntigravityStatusLine.ps1` — one-time Antigravity status-line setup.
+- `ai-usage-monitor/scripts/AntigravityStatusLine.ps1` — Antigravity quota status-line adapter.
 - `ai-usage-monitor/rainmeter/AIUsage/Codex/Codex.ini` — Codex skin.
 - `ai-usage-monitor/rainmeter/AIUsage/Claude/Claude.ini` — Claude skin.
-- `ai-usage-monitor/rainmeter/AIUsage/Launcher/Launcher.ini` — one-time launcher for both skins.
+- `ai-usage-monitor/rainmeter/AIUsage/Antigravity/Antigravity.ini` — Antigravity skin.
+- `ai-usage-monitor/rainmeter/AIUsage/Launcher/Launcher.ini` — one-time launcher for all three skins.
 - `ai-usage-monitor/rainmeter/AIUsage/@Resources/Provider.inc` — shared Rainmeter layout.
 - `ai-usage-monitor/rainmeter/AIUsage/@Resources/Usage.lua` — cache reader and dynamic bar colors.
 - `ai-usage-monitor/rainmeter/AIUsage/@Resources/RefreshCodex.vbs` — hidden Codex refresh launcher.
@@ -35,6 +40,8 @@ Rainmeter reads `usage.cache`; `usage.json` is the structured canonical cache.
 
 Codex data is obtained from the latest local JSONL `event_msg` / `token_count` record containing `payload.rate_limits`. Read quota metadata only; conversation prompts and responses are outside this feature.
 
+Antigravity data is obtained from the documented status-line JSON `quota` object. Read `remaining_fraction`, `reset_time`, and `reset_in_seconds` only; credentials, prompts, responses, and transcripts are outside this feature.
+
 Codex windows are selected by `window_minutes`:
 
 - approximately 300 minutes → `fiveHour`;
@@ -48,17 +55,17 @@ Claude quota data comes from Claude Code status-line JSON. The collector must no
 
 ## Rainmeter UI contract
 
-Keep Codex and Claude as separate skins with shared implementation in `Provider.inc` and `Usage.lua`.
+Keep Codex, Claude, and Antigravity as separate skins with shared implementation in `Provider.inc` and `Usage.lua`.
 
 Current compact layout contract:
 
-- card size: `270 × 220`;
+- card size: `270 × 180`;
 - row labels: `5H` and `W`;
 - reset text: `In <reset time>` immediately after the corresponding row label;
 - no time meter;
 - no `LOCAL CACHE` label;
 - Codex refresh uses `wscript.exe RefreshCodex.vbs` so PowerShell does not flash a console window;
-- the launcher positions Codex and Claude separately.
+- the launcher positions Codex, Claude, and Antigravity separately.
 
 Dynamic bar colors are based on displayed remaining percentage:
 
@@ -92,18 +99,20 @@ Run these from `ai-usage-monitor` after changes:
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\Test-RainmeterBindings.ps1
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\Test-CodexRateLimits.ps1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\Test-Antigravity.ps1
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\Test-Collector.ps1
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\Build-RainmeterPackage.ps1
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\tests\Test-RainmeterPackage.ps1
 ```
 
-Completion requires all applicable tests to pass, the package to contain both `Skins/AIUsage/Codex/Codex.ini` and `Skins/AIUsage/Claude/Claude.ini`, and the generated package to have a valid Rainmeter footer.
+Completion requires all applicable tests to pass, the package to contain `Skins/AIUsage/Codex/Codex.ini`, `Skins/AIUsage/Claude/Claude.ini`, and `Skins/AIUsage/Antigravity/Antigravity.ini`, and the generated package to have a valid Rainmeter footer.
 
 ## Plugin rules
 
 - Keep the Codex manifest at `.codex-plugin/plugin.json`.
 - Keep Codex hooks in the root `hooks.json`; do not add an unsupported `hooks` field to the Codex manifest.
 - Keep Claude hooks in `hooks/hooks.json` and use `${CLAUDE_PLUGIN_ROOT}` in hook commands.
+- Keep Antigravity hooks in `.agents/plugins/tokenmeter/hooks.json`; the status-line installer must preserve or stop for a different existing `statusLine` command.
 - A Codex marketplace reinstall may require a cachebuster and a new Codex task before updated hooks are loaded.
 - Do not silently replace a user’s unrelated Claude `statusLine`; the installer must preserve it or stop for manual merging.
 

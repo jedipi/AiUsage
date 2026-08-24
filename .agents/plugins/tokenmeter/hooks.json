@@ -1,0 +1,15 @@
+{
+  "tokenmeter-refresh": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File \"%LOCALAPPDATA%\\AiUsage\\AntigravityHook.ps1\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,7 +1,7 @@
 param([string]$PackagePath)
 
 $ErrorActionPreference = 'Stop'
-if ([string]::IsNullOrWhiteSpace($PackagePath)) { $PackagePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'dist\AIUsage_0.2.13.rmskin' }
+if ([string]::IsNullOrWhiteSpace($PackagePath)) { $PackagePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'dist\AIUsage_0.2.14.rmskin' }
 $bytes = [System.IO.File]::ReadAllBytes($PackagePath)
 if ($bytes.Length -lt 16) { throw 'Package is too short to contain a Rainmeter 4.5 footer.' }
 
@@ -26,6 +26,8 @@ try {
         'Skins/AIUsage/Codex/Gauge.ini',
         'Skins/AIUsage/Claude/Claude.ini',
         'Skins/AIUsage/Claude/Gauge.ini',
+        'Skins/AIUsage/Antigravity/Antigravity.ini',
+        'Skins/AIUsage/Antigravity/Gauge.ini',
         'Skins/AIUsage/Launcher/Launcher.ini',
         'Skins/AIUsage/@Resources/Provider.inc',
         'Skins/AIUsage/@Resources/Gauge.inc',

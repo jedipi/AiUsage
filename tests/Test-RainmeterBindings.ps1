@@ -2,8 +2,10 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $codexSkin = Get-Content -Raw -LiteralPath (Join-Path $root 'rainmeter\AIUsage\Codex\Codex.ini')
 $claudeSkin = Get-Content -Raw -LiteralPath (Join-Path $root 'rainmeter\AIUsage\Claude\Claude.ini')
+$antigravitySkin = Get-Content -Raw -LiteralPath (Join-Path $root 'rainmeter\AIUsage\Antigravity\Antigravity.ini')
 $codexGauge = Get-Content -Raw -LiteralPath (Join-Path $root 'rainmeter\AIUsage\Codex\Gauge.ini')
 $claudeGauge = Get-Content -Raw -LiteralPath (Join-Path $root 'rainmeter\AIUsage\Claude\Gauge.ini')
+$antigravityGauge = Get-Content -Raw -LiteralPath (Join-Path $root 'rainmeter\AIUsage\Antigravity\Gauge.ini')
 $provider = Get-Content -Raw -LiteralPath (Join-Path $root 'rainmeter\AIUsage\@Resources\Provider.inc')
 $gauge = Get-Content -Raw -LiteralPath (Join-Path $root 'rainmeter\AIUsage\@Resources\Gauge.inc')
 $lua = Get-Content -Raw -LiteralPath (Join-Path $root 'rainmeter\AIUsage\@Resources\Usage.lua')
@@ -13,10 +15,12 @@ $rainmeterInstaller = Get-Content -Raw -LiteralPath (Join-Path $root 'scripts\In
 
 if ($codexSkin -notmatch '(?m)^Provider=codex$') { throw 'Codex skin must use the codex provider.' }
 if ($claudeSkin -notmatch '(?m)^Provider=claude$') { throw 'Claude skin must use the claude provider.' }
+if ($antigravitySkin -notmatch '(?m)^Provider=antigravity$') { throw 'Antigravity skin must use the antigravity provider.' }
 if ($codexSkin -match '(?m)^(OnRefreshAction|RefreshAction)=\["powershell\.exe"') { throw 'Codex refresh must not launch a visible PowerShell console directly.' }
 if ($codexSkin -notmatch 'wscript\.exe.*RefreshCodex\.vbs') { throw 'Codex refresh must use the hidden WScript launcher.' }
 if ($codexGauge -notmatch '(?m)^Provider=codex$') { throw 'Codex gauge skin must use the codex provider.' }
 if ($claudeGauge -notmatch '(?m)^Provider=claude$') { throw 'Claude gauge skin must use the claude provider.' }
+if ($antigravityGauge -notmatch '(?m)^Provider=antigravity$') { throw 'Antigravity gauge skin must use the antigravity provider.' }
 if ($codexGauge -notmatch 'wscript\.exe.*RefreshCodex\.vbs') { throw 'Codex gauge refresh must use the hidden WScript launcher.' }
 if ($codexGauge -notmatch '(?m)^@Include=#@#Gauge\.inc$' -or $claudeGauge -notmatch '(?m)^@Include=#@#Gauge\.inc$') { throw 'Both gauge skins must use the shared gauge include.' }
 if ($codexHooks -match 'InstallRainmeter|Install-Rainmeter' -or $claudeHooks -match 'InstallRainmeter|Install-Rainmeter') { throw 'Plugin session hooks must not install Rainmeter on every session.' }
